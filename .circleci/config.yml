@@ -5,24 +5,7 @@ jobs:
     steps:
       - checkout
       - run: echo $LANG $LANGUAGE $LC_ALL
-#      - run:
-#          name: Install the latest version of Poetry
-#          command: |
-#            cat build-scripts/install.py | POETRY_UNINSTALL=1 python -
-#            cat build-scripts/install.py | python3 -
-      - run:
-          name: poetry self update
-          command: |
-            LC_ALL=
-            LANG=
-            LANGUAGE=
-            poetry self update
-      - run:
-          name: Poetry Install
-          command: |
-            LC_ALL=
-            LANG=
-            LANGUAGE=
-            poetry install --with=dev -vv
-      - run: pytest
+      - python/install-packages:
+          pkg-manager: poetry
+      - run: pytest --snapshot-test
 
