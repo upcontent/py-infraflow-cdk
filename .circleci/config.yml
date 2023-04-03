@@ -4,6 +4,6 @@ jobs:
       - image: cimg/python:3.9-node
     steps:
       - checkout
-      - run: poetry install --with=dev
+      - run: poetry install --with=dev -vv
       - run: pytest
 
