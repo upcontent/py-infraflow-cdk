@@ -7,9 +7,9 @@ jobs:
       - run:
           name: Poetry Install
           command: |
-            LC_ALL=C.UTF-8
-            LANG=C.UTF-8
-            LANGUAGE=C.UTF-8
+            LC_ALL=en_US.UTF-8
+            LANG=en_US.UTF-8
+            LANGUAGE=en_US.UTF-8
             poetry install --with=dev -vv
             echo $?
       - run: pytest
