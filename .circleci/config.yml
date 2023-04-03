@@ -4,6 +4,12 @@ jobs:
       - image: cimg/python:3.9-node
     steps:
       - checkout
+      - run:
+          name: Set Poetry Env
+          command: |
+            ENV LC_ALL=C.UTF-8
+            ENV LANG=C.UTF-8
+            ENV LANGUAGE=C.UTF-8
       - run: poetry install --with=dev -vv && echo $?
       - run: pytest
 
