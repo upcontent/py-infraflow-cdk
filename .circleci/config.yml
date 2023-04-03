@@ -1,11 +1,12 @@
 jobs:
+  orbs:
+    python: circleci/python@2.1.1
   build:
     docker:
       - image: cimg/python:3.9-node
+#    executor: python/default
     steps:
       - checkout
-      - run: echo $LANG $LANGUAGE $LC_ALL
-      - python/install-packages:
-          pkg-manager: poetry
+      - run: poetry install
       - run: pytest --snapshot-test
 
