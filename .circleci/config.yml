@@ -5,11 +5,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Set Poetry Env
+          name: Poetry Install
           command: |
             LC_ALL=C.UTF-8
             LANG=C.UTF-8
             LANGUAGE=C.UTF-8
-      - run: poetry install --with=dev -vv && echo $?
+            poetry install --with=dev -vv
+            echo $?
       - run: pytest
 
