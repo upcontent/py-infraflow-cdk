@@ -1,0 +1,724 @@
+{
+  "Resources": {
+    "mybus57189A50": {
+      "Type": "AWS::Events::EventBus",
+      "Properties": {
+        "Name": "QAMyServicemybus62D9BE18"
+      }
+    },
+    "mytestfunctionaddedqueue3DFB37D3": {
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "mytestfunctionaddedqueuePolicyF20D4B7A": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "addedEC29F23C",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionaddedqueue3DFB37D3",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Queues": [
+          {
+            "Ref": "mytestfunctionaddedqueue3DFB37D3"
+          }
+        ]
+      }
+    },
+    "mytestfunctionaddedfunctionServiceRole1FE42167": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionaddedqueue3DFB37D3",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B",
+        "Roles": [
+          {
+            "Ref": "mytestfunctionaddedfunctionServiceRole1FE42167"
+          }
+        ]
+      }
+    },
+    "mytestfunctionaddedfunction58A15883": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "mytestfunctionaddedfunctionServiceRole1FE42167",
+            "Arn"
+          ]
+        },
+        "Handler": "tests.unit.lambda_test_code.my_test_function",
+        "Runtime": "python3.9"
+      },
+      "DependsOn": [
+        "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B",
+        "mytestfunctionaddedfunctionServiceRole1FE42167"
+      ]
+    },
+    "mytestfunctionaddedfunctionSqsEventSourceQAMyServicemytestfunctionaddedqueueECD60E4A03E79859": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "mytestfunctionaddedfunction58A15883"
+        },
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mytestfunctionaddedqueue3DFB37D3",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "addedEC29F23C": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Ref": "mybus57189A50"
+        },
+        "EventPattern": {
+          "detail": {}
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "mytestfunctionaddedqueue3DFB37D3",
+                "Arn"
+              ]
+            },
+            "Id": "Target0"
+          }
+        ]
+      }
+    },
+    "mytestfunctionexpressqueue2E0E9F10": {
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "mytestfunctionexpressqueuePolicyCDD4BF46": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "updatedxTrueexpressTrue6F1F3071",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionexpressqueue2E0E9F10",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Queues": [
+          {
+            "Ref": "mytestfunctionexpressqueue2E0E9F10"
+          }
+        ]
+      }
+    },
+    "mytestfunctionexpressfunctionServiceRole80AD6004": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionexpressqueue2E0E9F10",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F",
+        "Roles": [
+          {
+            "Ref": "mytestfunctionexpressfunctionServiceRole80AD6004"
+          }
+        ]
+      }
+    },
+    "mytestfunctionexpressfunction2E5B950E": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "mytestfunctionexpressfunctionServiceRole80AD6004",
+            "Arn"
+          ]
+        },
+        "Handler": "tests.unit.lambda_test_code.my_test_function",
+        "Runtime": "python3.9"
+      },
+      "DependsOn": [
+        "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F",
+        "mytestfunctionexpressfunctionServiceRole80AD6004"
+      ]
+    },
+    "mytestfunctionexpressfunctionSqsEventSourceQAMyServicemytestfunctionexpressqueue1DB72A824F8B5E3D": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "mytestfunctionexpressfunction2E5B950E"
+        },
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mytestfunctionexpressqueue2E0E9F10",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "updatedxTrueexpressTrue6F1F3071": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Ref": "mybus57189A50"
+        },
+        "EventPattern": {
+          "detail": {}
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "mytestfunctionexpressqueue2E0E9F10",
+                "Arn"
+              ]
+            },
+            "Id": "Target0"
+          }
+        ]
+      }
+    },
+    "mytestfunctiondefaultqueue038DBB20": {
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "mytestfunctiondefaultqueuePolicy01736E8E": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "updatedxTrueexpressFalse10DF13FF",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctiondefaultqueue038DBB20",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Queues": [
+          {
+            "Ref": "mytestfunctiondefaultqueue038DBB20"
+          }
+        ]
+      }
+    },
+    "mytestfunctiondefaultfunctionServiceRoleBAC341B5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctiondefaultqueue038DBB20",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511",
+        "Roles": [
+          {
+            "Ref": "mytestfunctiondefaultfunctionServiceRoleBAC341B5"
+          }
+        ]
+      }
+    },
+    "mytestfunctiondefaultfunction735926BF": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "mytestfunctiondefaultfunctionServiceRoleBAC341B5",
+            "Arn"
+          ]
+        },
+        "Handler": "tests.unit.lambda_test_code.my_test_function",
+        "Runtime": "python3.9"
+      },
+      "DependsOn": [
+        "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511",
+        "mytestfunctiondefaultfunctionServiceRoleBAC341B5"
+      ]
+    },
+    "mytestfunctiondefaultfunctionSqsEventSourceQAMyServicemytestfunctiondefaultqueue213648400F6D2931": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "mytestfunctiondefaultfunction735926BF"
+        },
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mytestfunctiondefaultqueue038DBB20",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "updatedxTrueexpressFalse10DF13FF": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Ref": "mybus57189A50"
+        },
+        "EventPattern": {
+          "detail": {}
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "mytestfunctiondefaultqueue038DBB20",
+                "Arn"
+              ]
+            },
+            "Id": "Target0"
+          }
+        ]
+      }
+    },
+    "mytestfunctionupdateyqueue892F9CCE": {
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "mytestfunctionupdateyqueuePolicy7DBBA5D0": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl"
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "updatedyTrueEF3CA7A1",
+                      "Arn"
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionupdateyqueue892F9CCE",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Queues": [
+          {
+            "Ref": "mytestfunctionupdateyqueue892F9CCE"
+          }
+        ]
+      }
+    },
+    "mytestfunctionupdateyfunctionServiceRole01EF33A1": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mytestfunctionupdateyqueue892F9CCE",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC",
+        "Roles": [
+          {
+            "Ref": "mytestfunctionupdateyfunctionServiceRole01EF33A1"
+          }
+        ]
+      }
+    },
+    "mytestfunctionupdateyfunction090495D1": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "mytestfunctionupdateyfunctionServiceRole01EF33A1",
+            "Arn"
+          ]
+        },
+        "Handler": "tests.unit.lambda_test_code.my_test_function",
+        "Runtime": "python3.9"
+      },
+      "DependsOn": [
+        "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC",
+        "mytestfunctionupdateyfunctionServiceRole01EF33A1"
+      ]
+    },
+    "mytestfunctionupdateyfunctionSqsEventSourceQAMyServicemytestfunctionupdateyqueue5AB1E27D17E990DC": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "mytestfunctionupdateyfunction090495D1"
+        },
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mytestfunctionupdateyqueue892F9CCE",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "updatedyTrueEF3CA7A1": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Ref": "mybus57189A50"
+        },
+        "EventPattern": {
+          "detail": {}
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "mytestfunctionupdateyqueue892F9CCE",
+                "Arn"
+              ]
+            },
+            "Id": "Target0"
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

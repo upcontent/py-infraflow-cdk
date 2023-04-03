@@ -1,0 +1,9 @@
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.9-node
+    steps:
+      - checkout
+      - run: poetry install --with=dev
+      - run: pytest
+
