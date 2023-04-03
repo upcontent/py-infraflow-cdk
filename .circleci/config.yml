@@ -4,6 +4,7 @@ jobs:
       - image: cimg/python:3.9-node
     steps:
       - checkout
+      - run: echo $LANG $LANGUAGE $LC_ALL
       - run:
           name: Poetry Install
           command: |
