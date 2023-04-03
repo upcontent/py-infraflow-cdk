@@ -10,7 +10,13 @@ jobs:
 #          command: |
 #            cat build-scripts/install.py | POETRY_UNINSTALL=1 python -
 #            cat build-scripts/install.py | python3 -
-      - run: poetry self update
+      - run:
+          name: poetry self update
+          command: |
+            LC_ALL=
+            LANG=
+            LANGUAGE=
+            poetry self update
       - run:
           name: Poetry Install
           command: |
