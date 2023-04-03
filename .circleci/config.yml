@@ -5,11 +5,12 @@ jobs:
     steps:
       - checkout
       - run: echo $LANG $LANGUAGE $LC_ALL
-      - run:
-          name: Install the latest version of Poetry
-          command: |
-            cat build-scripts/install.py | POETRY_UNINSTALL=1 python -
-            cat build-scripts/install.py | python3 -
+#      - run:
+#          name: Install the latest version of Poetry
+#          command: |
+#            cat build-scripts/install.py | POETRY_UNINSTALL=1 python -
+#            cat build-scripts/install.py | python3 -
+      - run: poetry self update
       - run:
           name: Poetry Install
           command: |
