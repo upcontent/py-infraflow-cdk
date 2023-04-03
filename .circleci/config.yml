@@ -6,12 +6,16 @@ jobs:
       - checkout
       - run: echo $LANG $LANGUAGE $LC_ALL
       - run:
+          name: Install the latest version of Poetry
+          command: |
+            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_UNINSTALL=1 python -
+            curl -sSL https://install.python-poetry.org | python3 -
+      - run:
           name: Poetry Install
           command: |
             LC_ALL=en_US.UTF-8
             LANG=en_US.UTF-8
             LANGUAGE=en_US.UTF-8
             poetry install --with=dev -vv
-            echo $?
       - run: pytest
 
