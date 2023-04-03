@@ -4,6 +4,7 @@ from aws_cdk import aws_lambda_event_sources as sources
 from constructs import Construct, IConstruct
 
 from infraflow.cdk.core.service_stage import ServiceStageStack
+from infraflow.util import caps_camel
 
 registry = []
 
@@ -34,11 +35,11 @@ class LambdaContext:
         )
 
     def queued_function(self, handler, name=None, suffix=None, **queue_config):
-        base_name = name or handler.__name__
-        constructed_name = f"{base_name}_{suffix}" if suffix else base_name
+        base_name = name or caps_camel(handler.__name__)
+        constructed_name = caps_camel(f"{base_name}_{suffix}" if suffix else base_name)
         queued_function = QueueFunctionConstruct(self.stage, constructed_name)
-        queue = aws_sqs.Queue(queued_function, 'queue', **queue_config)
-        func = self.function(handler, 'function', scope_override=queued_function)
+        queue = aws_sqs.Queue(queued_function, 'Queue', **queue_config)
+        func = self.function(handler, 'Function', scope_override=queued_function)
         func.add_event_source(sources.SqsEventSource(queue))
         queued_function.queue = queue
         queued_function.function = func

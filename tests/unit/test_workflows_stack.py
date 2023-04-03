@@ -20,8 +20,8 @@ root_dir = os.path.dirname(script_path)
 def test_sqs_queue_created(snapshot):
     app = core.App()
     stack = ServiceStageStack(app, service_name='MyService', stage_name='QA', env=EnvConfig(vpc_id=""))
-    bus_cdk = events.EventBus(stack, 'my-bus')
-    bus = EventBridgeEventBus(stack, bus_cdk)
+    bus_cdk = events.EventBus(stack, 'MyBus')
+    bus = EventBridgeEventBus(stack, 'MyBus', bus_cdk)
     lambda_context = LambdaContext(stack, 'tests')
 
     added = bus.event('added')

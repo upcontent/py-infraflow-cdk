@@ -1,17 +1,17 @@
 {
   "Resources": {
-    "mybus57189A50": {
+    "MyBus7787FCC0": {
       "Type": "AWS::Events::EventBus",
       "Properties": {
-        "Name": "QAMyServicemybus62D9BE18"
+        "Name": "QAMyServiceMyBus80F5CD58"
       }
     },
-    "mytestfunctionaddedqueue3DFB37D3": {
+    "MyTestFunctionAddedQueueCBCB31C5": {
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete"
     },
-    "mytestfunctionaddedqueuePolicyF20D4B7A": {
+    "MyTestFunctionAddedQueuePolicy93F4152F": {
       "Type": "AWS::SQS::QueuePolicy",
       "Properties": {
         "PolicyDocument": {
@@ -26,7 +26,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "addedEC29F23C",
+                      "MyBusAdded8F8A47E9",
                       "Arn"
                     ]
                   }
@@ -38,7 +38,7 @@
               },
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionaddedqueue3DFB37D3",
+                  "MyTestFunctionAddedQueueCBCB31C5",
                   "Arn"
                 ]
               }
@@ -48,12 +48,12 @@
         },
         "Queues": [
           {
-            "Ref": "mytestfunctionaddedqueue3DFB37D3"
+            "Ref": "MyTestFunctionAddedQueueCBCB31C5"
           }
         ]
       }
     },
-    "mytestfunctionaddedfunctionServiceRole1FE42167": {
+    "MyTestFunctionAddedFunctionServiceRole8B63461E": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -84,7 +84,7 @@
         ]
       }
     },
-    "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B": {
+    "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -100,7 +100,7 @@
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionaddedqueue3DFB37D3",
+                  "MyTestFunctionAddedQueueCBCB31C5",
                   "Arn"
                 ]
               }
@@ -108,26 +108,26 @@
           ],
           "Version": "2012-10-17"
         },
-        "PolicyName": "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B",
+        "PolicyName": "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA",
         "Roles": [
           {
-            "Ref": "mytestfunctionaddedfunctionServiceRole1FE42167"
+            "Ref": "MyTestFunctionAddedFunctionServiceRole8B63461E"
           }
         ]
       }
     },
-    "mytestfunctionaddedfunction58A15883": {
+    "MyTestFunctionAddedFunction9B623D45": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
           },
-          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "mytestfunctionaddedfunctionServiceRole1FE42167",
+            "MyTestFunctionAddedFunctionServiceRole8B63461E",
             "Arn"
           ]
         },
@@ -135,29 +135,29 @@
         "Runtime": "python3.9"
       },
       "DependsOn": [
-        "mytestfunctionaddedfunctionServiceRoleDefaultPolicyB920F01B",
-        "mytestfunctionaddedfunctionServiceRole1FE42167"
+        "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA",
+        "MyTestFunctionAddedFunctionServiceRole8B63461E"
       ]
     },
-    "mytestfunctionaddedfunctionSqsEventSourceQAMyServicemytestfunctionaddedqueueECD60E4A03E79859": {
+    "MyTestFunctionAddedFunctionSqsEventSourceQAMyServiceMyTestFunctionAddedQueue1291348F82377587": {
       "Type": "AWS::Lambda::EventSourceMapping",
       "Properties": {
         "FunctionName": {
-          "Ref": "mytestfunctionaddedfunction58A15883"
+          "Ref": "MyTestFunctionAddedFunction9B623D45"
         },
         "EventSourceArn": {
           "Fn::GetAtt": [
-            "mytestfunctionaddedqueue3DFB37D3",
+            "MyTestFunctionAddedQueueCBCB31C5",
             "Arn"
           ]
         }
       }
     },
-    "addedEC29F23C": {
+    "MyBusAdded8F8A47E9": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "mybus57189A50"
+          "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
           "detail": {}
@@ -167,7 +167,7 @@
           {
             "Arn": {
               "Fn::GetAtt": [
-                "mytestfunctionaddedqueue3DFB37D3",
+                "MyTestFunctionAddedQueueCBCB31C5",
                 "Arn"
               ]
             },
@@ -176,12 +176,12 @@
         ]
       }
     },
-    "mytestfunctionexpressqueue2E0E9F10": {
+    "MyTestFunctionExpressQueueA88EFCB1": {
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete"
     },
-    "mytestfunctionexpressqueuePolicyCDD4BF46": {
+    "MyTestFunctionExpressQueuePolicyFB977D3C": {
       "Type": "AWS::SQS::QueuePolicy",
       "Properties": {
         "PolicyDocument": {
@@ -196,7 +196,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "updatedxTrueexpressTrue6F1F3071",
+                      "MyBusUpdatedXTrueExpressTrue1E04CBFE",
                       "Arn"
                     ]
                   }
@@ -208,7 +208,7 @@
               },
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionexpressqueue2E0E9F10",
+                  "MyTestFunctionExpressQueueA88EFCB1",
                   "Arn"
                 ]
               }
@@ -218,12 +218,12 @@
         },
         "Queues": [
           {
-            "Ref": "mytestfunctionexpressqueue2E0E9F10"
+            "Ref": "MyTestFunctionExpressQueueA88EFCB1"
           }
         ]
       }
     },
-    "mytestfunctionexpressfunctionServiceRole80AD6004": {
+    "MyTestFunctionExpressFunctionServiceRoleAD393FDD": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -254,7 +254,7 @@
         ]
       }
     },
-    "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F": {
+    "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -270,7 +270,7 @@
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionexpressqueue2E0E9F10",
+                  "MyTestFunctionExpressQueueA88EFCB1",
                   "Arn"
                 ]
               }
@@ -278,26 +278,26 @@
           ],
           "Version": "2012-10-17"
         },
-        "PolicyName": "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F",
+        "PolicyName": "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE",
         "Roles": [
           {
-            "Ref": "mytestfunctionexpressfunctionServiceRole80AD6004"
+            "Ref": "MyTestFunctionExpressFunctionServiceRoleAD393FDD"
           }
         ]
       }
     },
-    "mytestfunctionexpressfunction2E5B950E": {
+    "MyTestFunctionExpressFunction39663FE6": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
           },
-          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "mytestfunctionexpressfunctionServiceRole80AD6004",
+            "MyTestFunctionExpressFunctionServiceRoleAD393FDD",
             "Arn"
           ]
         },
@@ -305,29 +305,29 @@
         "Runtime": "python3.9"
       },
       "DependsOn": [
-        "mytestfunctionexpressfunctionServiceRoleDefaultPolicy2CF2D57F",
-        "mytestfunctionexpressfunctionServiceRole80AD6004"
+        "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE",
+        "MyTestFunctionExpressFunctionServiceRoleAD393FDD"
       ]
     },
-    "mytestfunctionexpressfunctionSqsEventSourceQAMyServicemytestfunctionexpressqueue1DB72A824F8B5E3D": {
+    "MyTestFunctionExpressFunctionSqsEventSourceQAMyServiceMyTestFunctionExpressQueue15A0DB143B3C4F77": {
       "Type": "AWS::Lambda::EventSourceMapping",
       "Properties": {
         "FunctionName": {
-          "Ref": "mytestfunctionexpressfunction2E5B950E"
+          "Ref": "MyTestFunctionExpressFunction39663FE6"
         },
         "EventSourceArn": {
           "Fn::GetAtt": [
-            "mytestfunctionexpressqueue2E0E9F10",
+            "MyTestFunctionExpressQueueA88EFCB1",
             "Arn"
           ]
         }
       }
     },
-    "updatedxTrueexpressTrue6F1F3071": {
+    "MyBusUpdatedXTrueExpressTrue1E04CBFE": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "mybus57189A50"
+          "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
           "detail": {}
@@ -337,7 +337,7 @@
           {
             "Arn": {
               "Fn::GetAtt": [
-                "mytestfunctionexpressqueue2E0E9F10",
+                "MyTestFunctionExpressQueueA88EFCB1",
                 "Arn"
               ]
             },
@@ -346,12 +346,12 @@
         ]
       }
     },
-    "mytestfunctiondefaultqueue038DBB20": {
+    "MyTestFunctionDefaultQueue80D923AB": {
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete"
     },
-    "mytestfunctiondefaultqueuePolicy01736E8E": {
+    "MyTestFunctionDefaultQueuePolicyBC4FABE8": {
       "Type": "AWS::SQS::QueuePolicy",
       "Properties": {
         "PolicyDocument": {
@@ -366,7 +366,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "updatedxTrueexpressFalse10DF13FF",
+                      "MyBusUpdatedXTrueExpressFalse19999060",
                       "Arn"
                     ]
                   }
@@ -378,7 +378,7 @@
               },
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctiondefaultqueue038DBB20",
+                  "MyTestFunctionDefaultQueue80D923AB",
                   "Arn"
                 ]
               }
@@ -388,12 +388,12 @@
         },
         "Queues": [
           {
-            "Ref": "mytestfunctiondefaultqueue038DBB20"
+            "Ref": "MyTestFunctionDefaultQueue80D923AB"
           }
         ]
       }
     },
-    "mytestfunctiondefaultfunctionServiceRoleBAC341B5": {
+    "MyTestFunctionDefaultFunctionServiceRole6145AE0A": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -424,7 +424,7 @@
         ]
       }
     },
-    "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511": {
+    "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -440,7 +440,7 @@
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctiondefaultqueue038DBB20",
+                  "MyTestFunctionDefaultQueue80D923AB",
                   "Arn"
                 ]
               }
@@ -448,26 +448,26 @@
           ],
           "Version": "2012-10-17"
         },
-        "PolicyName": "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511",
+        "PolicyName": "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9",
         "Roles": [
           {
-            "Ref": "mytestfunctiondefaultfunctionServiceRoleBAC341B5"
+            "Ref": "MyTestFunctionDefaultFunctionServiceRole6145AE0A"
           }
         ]
       }
     },
-    "mytestfunctiondefaultfunction735926BF": {
+    "MyTestFunctionDefaultFunction365A084E": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
           },
-          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "mytestfunctiondefaultfunctionServiceRoleBAC341B5",
+            "MyTestFunctionDefaultFunctionServiceRole6145AE0A",
             "Arn"
           ]
         },
@@ -475,29 +475,29 @@
         "Runtime": "python3.9"
       },
       "DependsOn": [
-        "mytestfunctiondefaultfunctionServiceRoleDefaultPolicy01415511",
-        "mytestfunctiondefaultfunctionServiceRoleBAC341B5"
+        "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9",
+        "MyTestFunctionDefaultFunctionServiceRole6145AE0A"
       ]
     },
-    "mytestfunctiondefaultfunctionSqsEventSourceQAMyServicemytestfunctiondefaultqueue213648400F6D2931": {
+    "MyTestFunctionDefaultFunctionSqsEventSourceQAMyServiceMyTestFunctionDefaultQueue4E52EF460F05081F": {
       "Type": "AWS::Lambda::EventSourceMapping",
       "Properties": {
         "FunctionName": {
-          "Ref": "mytestfunctiondefaultfunction735926BF"
+          "Ref": "MyTestFunctionDefaultFunction365A084E"
         },
         "EventSourceArn": {
           "Fn::GetAtt": [
-            "mytestfunctiondefaultqueue038DBB20",
+            "MyTestFunctionDefaultQueue80D923AB",
             "Arn"
           ]
         }
       }
     },
-    "updatedxTrueexpressFalse10DF13FF": {
+    "MyBusUpdatedXTrueExpressFalse19999060": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "mybus57189A50"
+          "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
           "detail": {}
@@ -507,7 +507,7 @@
           {
             "Arn": {
               "Fn::GetAtt": [
-                "mytestfunctiondefaultqueue038DBB20",
+                "MyTestFunctionDefaultQueue80D923AB",
                 "Arn"
               ]
             },
@@ -516,12 +516,12 @@
         ]
       }
     },
-    "mytestfunctionupdateyqueue892F9CCE": {
+    "MyTestFunctionUpdateyQueue3B9DFB11": {
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete"
     },
-    "mytestfunctionupdateyqueuePolicy7DBBA5D0": {
+    "MyTestFunctionUpdateyQueuePolicy0804B308": {
       "Type": "AWS::SQS::QueuePolicy",
       "Properties": {
         "PolicyDocument": {
@@ -536,7 +536,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "updatedyTrueEF3CA7A1",
+                      "MyBusUpdatedYTrue990470B0",
                       "Arn"
                     ]
                   }
@@ -548,7 +548,7 @@
               },
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionupdateyqueue892F9CCE",
+                  "MyTestFunctionUpdateyQueue3B9DFB11",
                   "Arn"
                 ]
               }
@@ -558,12 +558,12 @@
         },
         "Queues": [
           {
-            "Ref": "mytestfunctionupdateyqueue892F9CCE"
+            "Ref": "MyTestFunctionUpdateyQueue3B9DFB11"
           }
         ]
       }
     },
-    "mytestfunctionupdateyfunctionServiceRole01EF33A1": {
+    "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -594,7 +594,7 @@
         ]
       }
     },
-    "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC": {
+    "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -610,7 +610,7 @@
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mytestfunctionupdateyqueue892F9CCE",
+                  "MyTestFunctionUpdateyQueue3B9DFB11",
                   "Arn"
                 ]
               }
@@ -618,26 +618,26 @@
           ],
           "Version": "2012-10-17"
         },
-        "PolicyName": "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC",
+        "PolicyName": "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6",
         "Roles": [
           {
-            "Ref": "mytestfunctionupdateyfunctionServiceRole01EF33A1"
+            "Ref": "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB"
           }
         ]
       }
     },
-    "mytestfunctionupdateyfunction090495D1": {
+    "MyTestFunctionUpdateyFunction0730D187": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
           },
-          "S3Key": "73e18659fe17b11ca59dac90d4f8a250d559b5174112a4394a8e3535d3c5f285.zip"
+          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "mytestfunctionupdateyfunctionServiceRole01EF33A1",
+            "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB",
             "Arn"
           ]
         },
@@ -645,29 +645,29 @@
         "Runtime": "python3.9"
       },
       "DependsOn": [
-        "mytestfunctionupdateyfunctionServiceRoleDefaultPolicy75E244AC",
-        "mytestfunctionupdateyfunctionServiceRole01EF33A1"
+        "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6",
+        "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB"
       ]
     },
-    "mytestfunctionupdateyfunctionSqsEventSourceQAMyServicemytestfunctionupdateyqueue5AB1E27D17E990DC": {
+    "MyTestFunctionUpdateyFunctionSqsEventSourceQAMyServiceMyTestFunctionUpdateyQueue223FFFA334F5EF39": {
       "Type": "AWS::Lambda::EventSourceMapping",
       "Properties": {
         "FunctionName": {
-          "Ref": "mytestfunctionupdateyfunction090495D1"
+          "Ref": "MyTestFunctionUpdateyFunction0730D187"
         },
         "EventSourceArn": {
           "Fn::GetAtt": [
-            "mytestfunctionupdateyqueue892F9CCE",
+            "MyTestFunctionUpdateyQueue3B9DFB11",
             "Arn"
           ]
         }
       }
     },
-    "updatedyTrueEF3CA7A1": {
+    "MyBusUpdatedYTrue990470B0": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "mybus57189A50"
+          "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
           "detail": {}
@@ -677,7 +677,7 @@
           {
             "Arn": {
               "Fn::GetAtt": [
-                "mytestfunctionupdateyqueue892F9CCE",
+                "MyTestFunctionUpdateyQueue3B9DFB11",
                 "Arn"
               ]
             },

@@ -1,6 +1,8 @@
 from typing import Any, Union
 from typing import TypeVar, Generic
 
+from infraflow.util import caps_camel
+
 T = TypeVar('T')
 
 from aws_cdk import aws_sqs as sqs
@@ -15,11 +17,12 @@ from infraflow.cdk.core.service_stage import ServiceStageStack
 
 
 class Event:
-    def __init__(self, stage: ServiceStageStack, event_key: str):
+    def __init__(self, stage: ServiceStageStack, bus_id: str, event_key: str):
         self.stage = stage
         self.event_key = event_key
         self.priority = None
         self.filters: list[dict] = []
+        self.bus_id = bus_id
 
     def express_only(self):
         self.add_filter({
@@ -90,19 +93,22 @@ class Event:
 
     @property
     def id(self):
-        def filter_name(f):
-            return f"{list(f.keys())[0]}-{list(f.values())[0]}"
+        def filter_name(f: dict):
+            def prop_name(k, v):
+                return f"{caps_camel(k)}{caps_camel(v)}"
 
-        filters_string = '-'.join([filter_name(f) for f in self.filters])
-        return self.event_key + '-' + filters_string
+            return "".join(prop_name(k, v) for k, v in f.items())
+
+        filters_string = ''.join([filter_name(f) for f in self.filters])
+        return f"{caps_camel(self.bus_id)}{caps_camel(self.event_key)}{filters_string}"
 
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         pass
 
 
 class SnsEvent(Event):
-    def __init__(self, stage: ServiceStageStack, event_key: str, bus: sns.ITopic):
-        super().__init__(stage, event_key)
+    def __init__(self, stage: ServiceStageStack, bus_id: str, event_key: str, bus: sns.ITopic):
+        super().__init__(stage, bus_id, event_key)
         self.bus = bus
         self.filters = []
 
@@ -124,8 +130,8 @@ class SnsEvent(Event):
 
 
 class EventBridgeEvent(Event):
-    def __init__(self, stage: ServiceStageStack, event_key: str, bus: events.IEventBus):
-        super().__init__(stage, event_key)
+    def __init__(self, stage: ServiceStageStack, bus_id: str, event_key: str, bus: events.IEventBus):
+        super().__init__(stage, bus_id, event_key)
         self.bus = bus
         self.filters = []
 
@@ -149,8 +155,9 @@ def get_eb_target(subscriber: Union[sqs.Queue, lambdas.Function]):
 
 
 class InfraflowEventBus(Generic[T]):
-    def __init__(self, stage: ServiceStageStack, bus: T):
+    def __init__(self, stage: ServiceStageStack, bus_id, bus: T):
         self.bus = bus
+        self.bus_id = bus_id
         self.stage = stage
 
     def event(self, event_key: str) -> Event:
@@ -158,19 +165,19 @@ class InfraflowEventBus(Generic[T]):
 
 
 class EventBridgeEventBus(InfraflowEventBus[events.IEventBus]):
-    def __init__(self, stage: ServiceStageStack, bus: events.IEventBus):
-        super().__init__(stage, bus)
+    def __init__(self, stage: ServiceStageStack, bus_id, bus: events.IEventBus):
+        super().__init__(stage, bus_id, bus)
 
     def event(self, event_key: str) -> Event:
-        return EventBridgeEvent(self.stage, event_key, self.bus)
+        return EventBridgeEvent(self.stage, self.bus_id, event_key, self.bus)
 
 
 class SnsEventBus(InfraflowEventBus[sns.ITopic]):
-    def __init__(self, stage: ServiceStageStack, bus: sns.ITopic):
-        super().__init__(stage, bus)
+    def __init__(self, stage: ServiceStageStack, bus_id, bus: sns.ITopic):
+        super().__init__(stage, bus_id, bus)
 
     def event(self, event_key: str) -> Event:
-        return SnsEvent(self.stage, event_key, self.bus)
+        return SnsEvent(self.stage, self.bus_id, event_key, self.bus)
 
 # selection_bus = EventBus()
 #
