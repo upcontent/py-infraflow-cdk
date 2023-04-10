@@ -1,10 +1,11 @@
 from aws_cdk import IResource
+import aws_cdk.aws_iam as iam
 
 from infraflow.cdk.arns import arn_for_resource, service_key_for_resource
 
 
 class IamResource:
-    def __init__(self, resource: IResource = None, service=None, pattern: str=None, all: bool=False):
+    def __init__(self, resource: IResource = None, service=None, pattern: str = None, all: bool = False):
         if (int(bool(resource)) + int(bool(pattern)) + int(all)) > 1:
             raise ValueError('Must only provide one parameter for: resource, pattern, or all')
         self.all = all
@@ -12,13 +13,13 @@ class IamResource:
 
         if pattern:
             if service:
-                self.pattern = f"{service}:pattern"
+                self.resource_string = f"{service}:pattern"
             else:
-                self.pattern = pattern
+                self.resource_string = pattern
         elif all:
-            self.pattern = f'{service}:*'
+            self.resource_string = f'{service}:*'
         elif resource:
-            self.pattern = arn_for_resource(resource)
+            self.resource_string = arn_for_resource(resource)
 
         if resource:
             self.service = service_key_for_resource(resource)
@@ -27,7 +28,7 @@ class IamResource:
 
 
 class IamAction:
-    def __init__(self, service: str, all: bool=False, pattern: str=None):
+    def __init__(self, service: str, all: bool = False, pattern: str = None):
         """
         :param service: What AWS service this action is for
         :param all: whether to allow all actions for this service, can't be true/set if pattern is set
@@ -41,7 +42,35 @@ class IamAction:
         elif all:
             self.pattern = '*'
         self.service = service
-        self.key = f"{self.service}:{self.pattern}"
+        self.action_string = f"{self.service}:{self.pattern}"
 
 
+class IamStatement:
+    def __init__(self,
+                 effect: iam.Effect = iam.Effect.ALLOW,
+                 resources: list[IamResource] = [],
+                 actions: list[IamAction] = []):
+        self.effect = effect
+        self.actions = actions
+        self.resources = resources
 
+    def allow(self):
+        self.effect = iam.Effect.ALLOW
+        return self
+
+    def deny(self):
+        self.effect = iam.Effect.DENY
+        return self
+
+    def action(self, action: IamAction):
+        self.actions.append(action)
+
+    def actions(self, actions: list[IamAction]):
+        self.actions.extend(actions)
+
+    def to_cdk(self):
+        return iam.PolicyStatement(
+            actions=[a.action_string for a in self.actions],
+            resources=[r.resource_string for r in self.resources],
+            effect=self.effect
+        )
