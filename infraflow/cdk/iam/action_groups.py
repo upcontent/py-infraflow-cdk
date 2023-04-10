@@ -2,7 +2,7 @@ import infraflow.cdk.iam._actions as actions
 from infraflow.cdk.iam.base import IamAction
 
 
-class A4BActions:
+class A4B:
     def __init__(self):
         self.all = IamAction("a4b", all=True)
         self.AssociateDeviceWithRoom = actions.A4BAssociateDeviceWithRoom()
@@ -43,7 +43,7 @@ class A4BActions:
         self.UpdateSkillGroup = actions.A4BUpdateSkillGroup()
 
 
-class AcmActions:
+class Acm:
     def __init__(self):
         self.all = IamAction("acm", all=True)
         self.AddTagsToCertificate = actions.AcmAddTagsToCertificate()
@@ -58,7 +58,7 @@ class AcmActions:
         self.ResendValidationEmail = actions.AcmResendValidationEmail()
 
 
-class ApiGatewayActions:
+class ApiGateway:
     def __init__(self):
         self.all = IamAction("apigateway", all=True)
         self.DELETE = actions.ApiGatewayDELETE()
@@ -70,7 +70,7 @@ class ApiGatewayActions:
         self.PUT = actions.ApiGatewayPUT()
 
 
-class ApplicationAutoscalingActions:
+class ApplicationAutoscaling:
     def __init__(self):
         self.all = IamAction("application-autoscaling", all=True)
         self.DeleteScalingPolicy = actions.ApplicationAutoscalingDeleteScalingPolicy()
@@ -85,7 +85,7 @@ class ApplicationAutoscalingActions:
         self.RegisterScalableTarget = actions.ApplicationAutoscalingRegisterScalableTarget()
 
 
-class AppStreamActions:
+class AppStream:
     def __init__(self):
         self.all = IamAction("appstream", all=True)
         self.AssociateFleet = actions.AppstreamAssociateFleet()
@@ -123,7 +123,7 @@ class AppStreamActions:
         self.UpdateStack = actions.AppstreamUpdateStack()
 
 
-class AppsyncActions:
+class AppSync:
     def __init__(self):
         self.all = IamAction("appsync", all=True)
         self.CreateApiKey = actions.AppsyncCreateApiKey()
@@ -156,7 +156,7 @@ class AppsyncActions:
         self.UpdateType = actions.AppsyncUpdateType()
 
 
-class ArtifactActions:
+class Artifact:
     def __init__(self):
         self.all = IamAction("artifact", all=True)
         self.AcceptAgreement = actions.ArtifactAcceptAgreement()
@@ -165,7 +165,7 @@ class ArtifactActions:
         self.TerminateAgreement = actions.ArtifactTerminateAgreement()
 
 
-class AthenaActions:
+class Athena:
     def __init__(self):
         self.all = IamAction("athena", all=True)
         self.BatchGetNamedQuery = actions.AthenaBatchGetNamedQuery()
@@ -191,7 +191,7 @@ class AthenaActions:
         self.StopQueryExecution = actions.AthenaStopQueryExecution()
 
 
-class AutoScalingPlansActions:
+class AutoScalingPlans:
     def __init__(self):
         self.all = IamAction("autoscaling-plans", all=True)
         self.CreateScalingPlan = actions.AutoscalingPlansCreateScalingPlan()
@@ -200,7 +200,7 @@ class AutoScalingPlansActions:
         self.DescribeScalingPlans = actions.AutoscalingPlansDescribeScalingPlans()
 
 
-class AutoScalingActions:
+class AutoScaling:
     def __init__(self):
         self.all = IamAction("autoscaling", all=True)
         self.AttachInstances = actions.AutoscalingAttachInstances()
@@ -257,7 +257,7 @@ class AutoScalingActions:
         self.UpdateAutoScalingGroup = actions.AutoscalingUpdateAutoScalingGroup()
 
 
-class AwsMarketplaceManagementActions:
+class AwsMarketplaceManagement:
     def __init__(self):
         self.all = IamAction("aws-marketplace-management", all=True)
         self.uploadFiles = actions.AwsMarketplaceManagementuploadFiles()
@@ -266,7 +266,7 @@ class AwsMarketplaceManagementActions:
         self.viewSupport = actions.AwsMarketplaceManagementviewSupport()
 
 
-class AwsMarketplaceActions:
+class AwsMarketplace:
     def __init__(self):
         self.all = IamAction("aws-marketplace", all=True)
         self.BatchMeterUsage = actions.AwsMarketplaceBatchMeterUsage()
@@ -277,7 +277,7 @@ class AwsMarketplaceActions:
         self.ViewSubscriptions = actions.AwsMarketplaceViewSubscriptions()
 
 
-class AwsPortalActions:
+class AwsPortal:
     def __init__(self):
         self.all = IamAction("aws-portal", all=True)
         self.ModifyAccount = actions.AwsPortalModifyAccount()
@@ -289,7 +289,7 @@ class AwsPortalActions:
         self.ViewUsage = actions.AwsPortalViewUsage()
 
 
-class BatchActions:
+class Batch:
     def __init__(self):
         self.all = IamAction("batch", all=True)
         self.CancelJob = actions.BatchCancelJob()
@@ -310,14 +310,14 @@ class BatchActions:
         self.UpdateJobQueue = actions.BatchUpdateJobQueue()
 
 
-class BudgetsActions:
+class Budgets:
     def __init__(self):
         self.all = IamAction("budgets", all=True)
         self.ModifyBudget = actions.BudgetsModifyBudget()
         self.ViewBudget = actions.BudgetsViewBudget()
 
 
-class CeActions:
+class Ce:
     def __init__(self):
         self.all = IamAction("ce", all=True)
         self.GetCostAndUsage = actions.CeGetCostAndUsage()
@@ -326,7 +326,7 @@ class CeActions:
         self.GetTags = actions.CeGetTags()
 
 
-class ChimeActions:
+class Chime:
     def __init__(self):
         self.all = IamAction("chime", all=True)
         self.AcceptDelegate = actions.ChimeAcceptDelegate()
@@ -376,7 +376,7 @@ class ChimeActions:
         self.ValidateDelegate = actions.ChimeValidateDelegate()
 
 
-class Cloud9Actions:
+class Cloud9:
     def __init__(self):
         self.all = IamAction("cloud9", all=True)
         self.CreateEnvironmentEC2 = actions.Cloud9CreateEnvironmentEC2()
@@ -394,7 +394,7 @@ class Cloud9Actions:
         self.ValidateEnvironmentName = actions.Cloud9ValidateEnvironmentName()
 
 
-class CloudDirectoryActions:
+class CloudDirectory:
     def __init__(self):
         self.all = IamAction("clouddirectory", all=True)
         self.AddFacetToObject = actions.ClouddirectoryAddFacetToObject()
@@ -458,7 +458,7 @@ class CloudDirectoryActions:
         self.UpdateTypedLinkFacet = actions.ClouddirectoryUpdateTypedLinkFacet()
 
 
-class CloudFormationActions:
+class CloudFormation:
     def __init__(self):
         self.all = IamAction("cloudformation", all=True)
         self.CancelUpdateStack = actions.CloudformationCancelUpdateStack()
@@ -492,7 +492,7 @@ class CloudFormationActions:
         self.ValidateTemplate = actions.CloudformationValidateTemplate()
 
 
-class CloudFrontActions:
+class CloudFront:
     def __init__(self):
         self.all = IamAction("cloudfront", all=True)
         self.CreateCloudFrontOriginAccessIdentity = actions.CloudfrontCreateCloudFrontOriginAccessIdentity()
@@ -524,7 +524,7 @@ class CloudFrontActions:
         self.UpdateStreamingDistribution = actions.CloudfrontUpdateStreamingDistribution()
 
 
-class CloudHsmActions:
+class CloudHsm:
     def __init__(self):
         self.all = IamAction("cloudhsm", all=True)
         self.AddTagsToResource = actions.CloudhsmAddTagsToResource()
@@ -549,7 +549,7 @@ class CloudHsmActions:
         self.RemoveTagsFromResource = actions.CloudhsmRemoveTagsFromResource()
 
 
-class CloudSearchActions:
+class CloudSearch:
     def __init__(self):
         self.all = IamAction("cloudsearch", all=True)
         self.AddTags = actions.CloudsearchAddTags()
@@ -584,7 +584,7 @@ class CloudSearchActions:
         self.suggest = actions.Cloudsearchsuggest()
 
 
-class CloudTrailActions:
+class CloudTrail:
     def __init__(self):
         self.all = IamAction("cloudtrail", all=True)
         self.AddTags = actions.CloudtrailAddTags()
@@ -603,7 +603,7 @@ class CloudTrailActions:
         self.UpdateTrail = actions.CloudtrailUpdateTrail()
 
 
-class CloudWatchActions:
+class CloudWatch:
     def __init__(self):
         self.all = IamAction("cloudwatch", all=True)
         self.DeleteAlarms = actions.CloudwatchDeleteAlarms()
@@ -624,7 +624,7 @@ class CloudWatchActions:
         self.SetAlarmState = actions.CloudwatchSetAlarmState()
 
 
-class CodeBuildActions:
+class CodeBuild:
     def __init__(self):
         self.all = IamAction("codebuild", all=True)
         self.BatchDeleteBuilds = actions.CodebuildBatchDeleteBuilds()
@@ -644,7 +644,7 @@ class CodeBuildActions:
         self.UpdateProject = actions.CodebuildUpdateProject()
 
 
-class CodeCommitActions:
+class CodeCommit:
     def __init__(self):
         self.all = IamAction("codecommit", all=True)
         self.BatchGetPullRequests = actions.CodecommitBatchGetPullRequests()
@@ -696,7 +696,7 @@ class CodeCommitActions:
         self.UploadArchive = actions.CodecommitUploadArchive()
 
 
-class CodeDeployActions:
+class CodeDeploy:
     def __init__(self):
         self.all = IamAction("codedeploy", all=True)
         self.AddTagsToOnPremisesInstances = actions.CodedeployAddTagsToOnPremisesInstances()
@@ -737,7 +737,7 @@ class CodeDeployActions:
         self.UpdateDeploymentGroup = actions.CodedeployUpdateDeploymentGroup()
 
 
-class CodePipelineActions:
+class CodePipeline:
     def __init__(self):
         self.all = IamAction("codepipeline", all=True)
         self.AcknowledgeJob = actions.CodepipelineAcknowledgeJob()
@@ -769,7 +769,7 @@ class CodePipelineActions:
         self.UpdatePipeline = actions.CodepipelineUpdatePipeline()
 
 
-class CodeStarActions:
+class CodeStar:
     def __init__(self):
         self.all = IamAction("codestar", all=True)
         self.AssociateTeamMember = actions.CodestarAssociateTeamMember()
@@ -793,7 +793,7 @@ class CodeStarActions:
         self.VerifyServiceRole = actions.CodestarVerifyServiceRole()
 
 
-class CognitoIdentityActions:
+class CognitoIdentity:
     def __init__(self):
         self.all = IamAction("cognito-identity", all=True)
         self.CreateIdentityPool = actions.CognitoIdentityCreateIdentityPool()
@@ -816,7 +816,7 @@ class CognitoIdentityActions:
         self.UpdateIdentityPool = actions.CognitoIdentityUpdateIdentityPool()
 
 
-class CognitoIdpActions:
+class CognitoIdp:
     def __init__(self):
         self.all = IamAction("cognito-idp", all=True)
         self.AddCustomAttributes = actions.CognitoIdpAddCustomAttributes()
@@ -893,7 +893,7 @@ class CognitoIdpActions:
         self.VerifyUserAttribute = actions.CognitoIdpVerifyUserAttribute()
 
 
-class CognitoSyncActions:
+class CognitoSync:
     def __init__(self):
         self.all = IamAction("cognito-sync", all=True)
         self.BulkPublish = actions.CognitoSyncBulkPublish()
@@ -917,7 +917,7 @@ class CognitoSyncActions:
         self.UpdateRecords = actions.CognitoSyncUpdateRecords()
 
 
-class ComprehendActions:
+class Comprehend:
     def __init__(self):
         self.all = IamAction("comprehend", all=True)
         self.BatchDetectDominantLanguage = actions.ComprehendBatchDetectDominantLanguage()
@@ -933,7 +933,7 @@ class ComprehendActions:
         self.StartTopicsDetectionJob = actions.ComprehendStartTopicsDetectionJob()
 
 
-class ConfigActions:
+class Config:
     def __init__(self):
         self.all = IamAction("config", all=True)
         self.DeleteConfigRule = actions.ConfigDeleteConfigRule()
@@ -966,7 +966,7 @@ class ConfigActions:
         self.StopConfigurationRecorder = actions.ConfigStopConfigurationRecorder()
 
 
-class ConnectActions:
+class Connect:
     def __init__(self):
         self.all = IamAction("connect", all=True)
         self.CreateInstance = actions.ConnectCreateInstance()
@@ -978,14 +978,14 @@ class ConnectActions:
         self.ModifyInstance = actions.ConnectModifyInstance()
 
 
-class CrowdActions:
+class Crowd:
     def __init__(self):
         self.all = IamAction("crowd", all=True)
         self.GetTask = actions.CrowdGetTask()
         self.PutTask = actions.CrowdPutTask()
 
 
-class CurActions:
+class Cur:
     def __init__(self):
         self.all = IamAction("cur", all=True)
         self.DeleteReportDefinition = actions.CurDeleteReportDefinition()
@@ -993,7 +993,7 @@ class CurActions:
         self.PutReportDefinition = actions.CurPutReportDefinition()
 
 
-class DatapipelineActions:
+class Datapipeline:
     def __init__(self):
         self.all = IamAction("datapipeline", all=True)
         self.ActivatePipeline = actions.DatapipelineActivatePipeline()
@@ -1019,7 +1019,7 @@ class DatapipelineActions:
         self.ValidatePipelineDefinition = actions.DatapipelineValidatePipelineDefinition()
 
 
-class DaxActions:
+class Dax:
     def __init__(self):
         self.all = IamAction("dax", all=True)
         self.BatchGetItem = actions.DaxBatchGetItem()
@@ -1055,7 +1055,7 @@ class DaxActions:
         self.UpdateSubnetGroup = actions.DaxUpdateSubnetGroup()
 
 
-class DeviceFarmActions:
+class DeviceFarm:
     def __init__(self):
         self.all = IamAction("devicefarm", all=True)
         self.CreateDevicePool = actions.DevicefarmCreateDevicePool()
@@ -1108,7 +1108,7 @@ class DeviceFarmActions:
         self.UpdateProject = actions.DevicefarmUpdateProject()
 
 
-class DirectConnectActions:
+class DirectConnect:
     def __init__(self):
         self.all = IamAction("directconnect", all=True)
         self.AllocateConnectionOnInterconnect = actions.DirectconnectAllocateConnectionOnInterconnect()
@@ -1134,7 +1134,7 @@ class DirectConnectActions:
         self.DescribeVirtualInterfaces = actions.DirectconnectDescribeVirtualInterfaces()
 
 
-class DiscoveryActions:
+class Discovery:
     def __init__(self):
         self.all = IamAction("discovery", all=True)
         self.AssociateConfigurationItemsToApplication = actions.DiscoveryAssociateConfigurationItemsToApplication()
@@ -1157,7 +1157,7 @@ class DiscoveryActions:
         self.UpdateApplication = actions.DiscoveryUpdateApplication()
 
 
-class DmsActions:
+class Dms:
     def __init__(self):
         self.all = IamAction("dms", all=True)
         self.AddTagsToResource = actions.DmsAddTagsToResource()
@@ -1198,7 +1198,7 @@ class DmsActions:
         self.TestConnection = actions.DmsTestConnection()
 
 
-class DsActions:
+class Ds:
     def __init__(self):
         self.all = IamAction("ds", all=True)
         self.AddIpRoutes = actions.DsAddIpRoutes()
@@ -1244,7 +1244,7 @@ class DsActions:
         self.VerifyTrust = actions.DsVerifyTrust()
 
 
-class DynamodbActions:
+class Dynamodb:
     def __init__(self):
         self.all = IamAction("dynamodb", all=True)
         self.BatchGetItem = actions.DynamodbBatchGetItem()
@@ -1283,7 +1283,7 @@ class DynamodbActions:
         self.UpdateTimeToLive = actions.DynamodbUpdateTimeToLive()
 
 
-class Ec2Actions:
+class Ec2:
     def __init__(self):
         self.all = IamAction("ec2", all=True)
         self.AcceptReservedInstancesExchangeQuote = actions.Ec2AcceptReservedInstancesExchangeQuote()
@@ -1554,7 +1554,7 @@ class Ec2Actions:
         self.UpdateSecurityGroupRuleDescriptionsIngress = actions.Ec2UpdateSecurityGroupRuleDescriptionsIngress()
 
 
-class Ec2MessagesActions:
+class Ec2Messages:
     def __init__(self):
         self.all = IamAction("ec2messages", all=True)
         self.AcknowledgeMessage = actions.Ec2MessagesAcknowledgeMessage()
@@ -1565,7 +1565,7 @@ class Ec2MessagesActions:
         self.SendReply = actions.Ec2MessagesSendReply()
 
 
-class EcrActions:
+class Ecr:
     def __init__(self):
         self.all = IamAction("ecr", all=True)
         self.BatchCheckLayerAvailability = actions.EcrBatchCheckLayerAvailability()
@@ -1587,7 +1587,7 @@ class EcrActions:
         self.UploadLayerPart = actions.EcrUploadLayerPart()
 
 
-class EcsActions:
+class Ecs:
     def __init__(self):
         self.all = IamAction("ecs", all=True)
         self.CreateCluster = actions.EcsCreateCluster()
@@ -1622,7 +1622,7 @@ class EcsActions:
         self.UpdateService = actions.EcsUpdateService()
 
 
-class ElasticacheActions:
+class Elasticache:
     def __init__(self):
         self.all = IamAction("elasticache", all=True)
         self.AddTagsToResource = actions.ElasticacheAddTagsToResource()
@@ -1665,7 +1665,7 @@ class ElasticacheActions:
         self.RevokeCacheSecurityGroupIngress = actions.ElasticacheRevokeCacheSecurityGroupIngress()
 
 
-class ElasticBeanstalkActions:
+class ElasticBeanstalk:
     def __init__(self):
         self.all = IamAction("elasticbeanstalk", all=True)
         self.AbortEnvironmentUpdate = actions.ElasticbeanstalkAbortEnvironmentUpdate()
@@ -1711,7 +1711,7 @@ class ElasticBeanstalkActions:
         self.ValidateConfigurationSettings = actions.ElasticbeanstalkValidateConfigurationSettings()
 
 
-class ElasticFileSystemActions:
+class ElasticFileSystem:
     def __init__(self):
         self.all = IamAction("elasticfilesystem", all=True)
         self.CreateFileSystem = actions.ElasticfilesystemCreateFileSystem()
@@ -1727,7 +1727,7 @@ class ElasticFileSystemActions:
         self.ModifyMountTargetSecurityGroups = actions.ElasticfilesystemModifyMountTargetSecurityGroups()
 
 
-class ElasticLoadBalancingActions:
+class ElasticLoadBalancing:
     def __init__(self):
         self.all = IamAction("elasticloadbalancing", all=True)
         self.AddTags = actions.ElasticloadbalancingAddTags()
@@ -1782,7 +1782,7 @@ class ElasticLoadBalancingActions:
         self.SetSubnets = actions.ElasticloadbalancingSetSubnets()
 
 
-class ElasticMapReduceActions:
+class ElasticMapReduce:
     def __init__(self):
         self.all = IamAction("elasticmapreduce", all=True)
         self.AddInstanceGroups = actions.ElasticmapreduceAddInstanceGroups()
@@ -1812,7 +1812,7 @@ class ElasticMapReduceActions:
         self.ViewEventsFromAllClustersInConsole = actions.ElasticmapreduceViewEventsFromAllClustersInConsole()
 
 
-class ElasticTranscoderActions:
+class ElasticTranscoder:
     def __init__(self):
         self.all = IamAction("elastictranscoder", all=True)
         self.CancelJob = actions.ElastictranscoderCancelJob()
@@ -1834,7 +1834,7 @@ class ElasticTranscoderActions:
         self.UpdatePipelineStatus = actions.ElastictranscoderUpdatePipelineStatus()
 
 
-class EsActions:
+class Es:
     def __init__(self):
         self.all = IamAction("es", all=True)
         self.AddTags = actions.EsAddTags()
@@ -1854,7 +1854,7 @@ class EsActions:
         self.UpdateElasticsearchDomainConfig = actions.EsUpdateElasticsearchDomainConfig()
 
 
-class EventsActions:
+class Events:
     def __init__(self):
         self.all = IamAction("events", all=True)
         self.DeleteRule = actions.EventsDeleteRule()
@@ -1871,14 +1871,14 @@ class EventsActions:
         self.TestEventPattern = actions.EventsTestEventPattern()
 
 
-class ExecuteApiActions:
+class ExecuteApi:
     def __init__(self):
         self.all = IamAction("execute-api", all=True)
         self.InvalidateCache = actions.ExecuteApiInvalidateCache()
         self.Invoke = actions.ExecuteApiInvoke()
 
 
-class FirehoseActions:
+class Firehose:
     def __init__(self):
         self.all = IamAction("firehose", all=True)
         self.CreateDeliveryStream = actions.FirehoseCreateDeliveryStream()
@@ -1890,7 +1890,7 @@ class FirehoseActions:
         self.UpdateDestination = actions.FirehoseUpdateDestination()
 
 
-class FreertosActions:
+class Freertos:
     def __init__(self):
         self.all = IamAction("freertos", all=True)
         self.CreateSoftwareConfiguration = actions.FreertosCreateSoftwareConfiguration()
@@ -1906,7 +1906,7 @@ class FreertosActions:
         self.UpdateSoftwareConfiguration = actions.FreertosUpdateSoftwareConfiguration()
 
 
-class GameLiftActions:
+class GameLift:
     def __init__(self):
         self.all = IamAction("gamelift", all=True)
         self.CreateAlias = actions.GameliftCreateAlias()
@@ -1951,7 +1951,7 @@ class GameLiftActions:
         self.UpdateRuntimeConfiguration = actions.GameliftUpdateRuntimeConfiguration()
 
 
-class GlacierActions:
+class Glacier:
     def __init__(self):
         self.all = IamAction("glacier", all=True)
         self.AbortMultipartUpload = actions.GlacierAbortMultipartUpload()
@@ -1989,7 +1989,7 @@ class GlacierActions:
         self.UploadMultipartPart = actions.GlacierUploadMultipartPart()
 
 
-class GlueActions:
+class Glue:
     def __init__(self):
         self.all = IamAction("glue", all=True)
         self.BatchCreatePartition = actions.GlueBatchCreatePartition()
@@ -2067,7 +2067,7 @@ class GlueActions:
         self.UpdateUserDefinedFunction = actions.GlueUpdateUserDefinedFunction()
 
 
-class GreengrassActions:
+class Greengrass:
     def __init__(self):
         self.all = IamAction("greengrass", all=True)
         self.AssociateRoleToGroup = actions.GreengrassAssociateRoleToGroup()
@@ -2146,7 +2146,7 @@ class GreengrassActions:
         self.UpdateSubscriptionDefinition = actions.GreengrassUpdateSubscriptionDefinition()
 
 
-class GuardDutyActions:
+class GuardDuty:
     def __init__(self):
         self.all = IamAction("guardduty", all=True)
         self.AcceptInvitation = actions.GuarddutyAcceptInvitation()
@@ -2188,7 +2188,7 @@ class GuardDutyActions:
         self.UpdateThreatIntelSet = actions.GuarddutyUpdateThreatIntelSet()
 
 
-class HealthActions:
+class Health:
     def __init__(self):
         self.all = IamAction("health", all=True)
         self.DescribeAffectedEntities = actions.HealthDescribeAffectedEntities()
@@ -2199,7 +2199,7 @@ class HealthActions:
         self.DescribeEvents = actions.HealthDescribeEvents()
 
 
-class IamActions:
+class Iam:
     def __init__(self):
         self.all = IamAction("iam", all=True)
         self.AddClientIDToOpenIDConnectProvider = actions.IamAddClientIDToOpenIDConnectProvider()
@@ -2331,7 +2331,7 @@ class IamActions:
         self.UploadSigningCertificate = actions.IamUploadSigningCertificate()
 
 
-class ImportExportActions:
+class ImportExport:
     def __init__(self):
         self.all = IamAction("importexport", all=True)
         self.CancelJob = actions.ImportexportCancelJob()
@@ -2342,7 +2342,7 @@ class ImportExportActions:
         self.UpdateJob = actions.ImportexportUpdateJob()
 
 
-class InspectorActions:
+class Inspector:
     def __init__(self):
         self.all = IamAction("inspector", all=True)
         self.AddAttributesToFindings = actions.InspectorAddAttributesToFindings()
@@ -2379,7 +2379,7 @@ class InspectorActions:
         self.UpdateAssessmentTarget = actions.InspectorUpdateAssessmentTarget()
 
 
-class IotActions:
+class Iot:
     def __init__(self):
         self.all = IamAction("iot", all=True)
         self.AcceptCertificateTransfer = actions.IotAcceptCertificateTransfer()
@@ -2491,7 +2491,7 @@ class IotActions:
         self.UpdateThingShadow = actions.IotUpdateThingShadow()
 
 
-class IotAnalyticsActions:
+class IotAnalytics:
     def __init__(self):
         self.all = IamAction("iotanalytics", all=True)
         self.CreateChannel = actions.IotanalyticsCreateChannel()
@@ -2517,7 +2517,7 @@ class IotAnalyticsActions:
         self.UpdatePipeline = actions.IotanalyticsUpdatePipeline()
 
 
-class KinesisActions:
+class Kinesis:
     def __init__(self):
         self.all = IamAction("kinesis", all=True)
         self.AddTagsToStream = actions.KinesisAddTagsToStream()
@@ -2541,7 +2541,7 @@ class KinesisActions:
         self.UpdateShardCount = actions.KinesisUpdateShardCount()
 
 
-class KinesisAnalyticsActions:
+class KinesisAnalytics:
     def __init__(self):
         self.all = IamAction("kinesisanalytics", all=True)
         self.AddApplicationInput = actions.KinesisanalyticsAddApplicationInput()
@@ -2559,7 +2559,7 @@ class KinesisAnalyticsActions:
         self.UpdateApplication = actions.KinesisanalyticsUpdateApplication()
 
 
-class KinesisVideoActions:
+class KinesisVideo:
     def __init__(self):
         self.all = IamAction("kinesisvideo", all=True)
         self.CreateStream = actions.KinesisvideoCreateStream()
@@ -2578,7 +2578,7 @@ class KinesisVideoActions:
         self.UpdateStream = actions.KinesisvideoUpdateStream()
 
 
-class KmsActions:
+class Kms:
     def __init__(self):
         self.all = IamAction("kms", all=True)
         self.CancelKeyDeletion = actions.KmsCancelKeyDeletion()
@@ -2619,7 +2619,7 @@ class KmsActions:
         self.UpdateKeyDescription = actions.KmsUpdateKeyDescription()
 
 
-class LambdaActions:
+class Lambda:
     def __init__(self):
         self.all = IamAction("lambda", all=True)
         self.AddPermission = actions.LambdaAddPermission()
@@ -2655,7 +2655,7 @@ class LambdaActions:
         self.UpdateFunctionConfiguration = actions.LambdaUpdateFunctionConfiguration()
 
 
-class LexActions:
+class Lex:
     def __init__(self):
         self.all = IamAction("lex", all=True)
         self.CreateBotVersion = actions.LexCreateBotVersion()
@@ -2695,7 +2695,7 @@ class LexActions:
         self.PutSlotType = actions.LexPutSlotType()
 
 
-class LightsailActions:
+class Lightsail:
     def __init__(self):
         self.all = IamAction("lightsail", all=True)
         self.AllocateStaticIp = actions.LightsailAllocateStaticIp()
@@ -2747,7 +2747,7 @@ class LightsailActions:
         self.UpdateDomainEntry = actions.LightsailUpdateDomainEntry()
 
 
-class LogsActions:
+class Logs:
     def __init__(self):
         self.all = IamAction("logs", all=True)
         self.AssociateKmsKey = actions.LogsAssociateKmsKey()
@@ -2785,7 +2785,7 @@ class LogsActions:
         self.UntagLogGroup = actions.LogsUntagLogGroup()
 
 
-class MachinelearningActions:
+class Machinelearning:
     def __init__(self):
         self.all = IamAction("machinelearning",  all=True)
         self.AddTags = actions.MachinelearningAddTags()
@@ -2818,7 +2818,7 @@ class MachinelearningActions:
         self.UpdateMLModel = actions.MachinelearningUpdateMLModel()
 
 
-class MechanicalTurkActions:
+class MechanicalTurk:
     def __init__(self):
         self.all = IamAction("mechanicalturk",  all=True)
         self.ApproveAssignment = actions.MechanicalturkApproveAssignment()
@@ -2866,7 +2866,7 @@ class MechanicalTurkActions:
         self.UpdateQualificationType = actions.MechanicalturkUpdateQualificationType()
 
 
-class MediaConvertActions:
+class MediaConvert:
     def __init__(self):
         self.all = IamAction("mediaconvert",  all=True)
         self.CancelJob = actions.MediaconvertCancelJob()
@@ -2891,7 +2891,7 @@ class MediaConvertActions:
         self.UpdateQueue = actions.MediaconvertUpdateQueue()
 
 
-class MediaLiveActions:
+class MediaLive:
     def __init__(self):
         self.all = IamAction("medialive",  all=True)
         self.CreateChannel = actions.MedialiveCreateChannel()
@@ -2910,7 +2910,7 @@ class MediaLiveActions:
         self.StopChannel = actions.MedialiveStopChannel()
 
 
-class MediaPackageActions:
+class MediaPackage:
     def __init__(self):
         self.all = IamAction("mediapackage",  all=True)
         self.CreateChannel = actions.MediapackageCreateChannel()
@@ -2925,7 +2925,7 @@ class MediaPackageActions:
         self.UpdateOriginEndpoint = actions.MediapackageUpdateOriginEndpoint()
 
 
-class MediaStoreActions:
+class MediaStore:
     def __init__(self):
         self.all = IamAction("mediastore",  all=True)
         self.CreateContainer = actions.MediastoreCreateContainer()
@@ -2942,7 +2942,7 @@ class MediaStoreActions:
         self.PutObject = actions.MediastorePutObject()
 
 
-class MghActions:
+class Mgh:
     def __init__(self):
         self.all = IamAction("mgh",  all=True)
         self.AssociateCreatedArtifact = actions.MghAssociateCreatedArtifact()
@@ -2963,7 +2963,7 @@ class MghActions:
         self.PutResourceAttributes = actions.MghPutResourceAttributes()
 
 
-class MobileAnalyticsActions:
+class MobileAnalytics:
     def __init__(self):
         self.all = IamAction("mobileanalytics",  all=True)
         self.GetFinancialReports = actions.MobileanalyticsGetFinancialReports()
@@ -2971,7 +2971,7 @@ class MobileAnalyticsActions:
         self.PutEvents = actions.MobileanalyticsPutEvents()
 
 
-class MobileHubActions:
+class MobileHub:
     def __init__(self):
         self.all = IamAction("mobilehub",  all=True)
         self.CreateProject = actions.MobilehubCreateProject()
@@ -2995,7 +2995,7 @@ class MobileHubActions:
         self.VerifyServiceRole = actions.MobilehubVerifyServiceRole()
 
 
-class MobileTargetingActions:
+class MobileTargeting:
     def __init__(self):
         self.all = IamAction("mobiletargeting",  all=True)
         self.CreateCampaign = actions.MobiletargetingCreateCampaign()
@@ -3031,7 +3031,7 @@ class MobileTargetingActions:
         self.UpdateSegment = actions.MobiletargetingUpdateSegment()
 
 
-class MqActions:
+class Mq:
     def __init__(self):
         self.all = IamAction("mq",  all=True)
         self.CreateBroker = actions.MqCreateBroker()
@@ -3053,7 +3053,7 @@ class MqActions:
         self.UpdateUser = actions.MqUpdateUser()
 
 
-class OpsworksCmActions:
+class OpsworksCm:
     def __init__(self):
         self.all = IamAction("opsworks-cm",  all=True)
         self.AssociateNode = actions.OpsworksCmAssociateNode()
@@ -3073,7 +3073,7 @@ class OpsworksCmActions:
         self.UpdateServerEngineAttributes = actions.OpsworksCmUpdateServerEngineAttributes()
 
 
-class OpsworksActions:
+class Opsworks:
     def __init__(self):
         self.all = IamAction("opsworks",  all=True)
         self.AssignInstance = actions.OpsworksAssignInstance()
@@ -3151,7 +3151,7 @@ class OpsworksActions:
         self.UpdateVolume = actions.OpsworksUpdateVolume()
 
 
-class OrganizationsActions:
+class Organizations:
     def __init__(self):
         self.all = IamAction("organizations",  all=True)
         self.AcceptHandshake = actions.OrganizationsAcceptHandshake()
@@ -3195,7 +3195,7 @@ class OrganizationsActions:
         self.UpdatePolicy = actions.OrganizationsUpdatePolicy()
 
 
-class PollyActions:
+class Polly:
     def __init__(self):
         self.all = IamAction("polly",  all=True)
         self.DeleteLexicon = actions.PollyDeleteLexicon()
@@ -3206,7 +3206,7 @@ class PollyActions:
         self.SynthesizeSpeech = actions.PollySynthesizeSpeech()
 
 
-class PricingActions:
+class Pricing:
     def __init__(self):
         self.all = IamAction("pricing",  all=True)
         self.DescribeServices = actions.PricingDescribeServices()
@@ -3214,7 +3214,7 @@ class PricingActions:
         self.GetProducts = actions.PricingGetProducts()
 
 
-class RdsActions:
+class Rds:
     def __init__(self):
         self.all = IamAction("rds",  all=True)
         self.AddRoleToDBCluster = actions.RdsAddRoleToDBCluster()
@@ -3303,7 +3303,7 @@ class RdsActions:
         self.StopDBInstance = actions.RdsStopDBInstance()
 
 
-class RedshiftActions:
+class Redshift:
     def __init__(self):
         self.all = IamAction("redshift",  all=True)
         self.AuthorizeClusterSecurityGroupIngress = actions.RedshiftAuthorizeClusterSecurityGroupIngress()
@@ -3375,7 +3375,7 @@ class RedshiftActions:
         self.ViewQueriesInConsole = actions.RedshiftViewQueriesInConsole()
 
 
-class RekognitionActions:
+class Rekognition:
     def __init__(self):
         self.all = IamAction("rekognition",  all=True)
         self.CompareFaces = actions.RekognitionCompareFaces()
@@ -3413,7 +3413,7 @@ class RekognitionActions:
         self.StopStreamProcessor = actions.RekognitionStopStreamProcessor()
 
 
-class ResourceGroupsActions:
+class ResourceGroups:
     def __init__(self):
         self.all = IamAction("resource-groups",  all=True)
         self.CreateGroup = actions.ResourceGroupsCreateGroup()
@@ -3430,7 +3430,7 @@ class ResourceGroupsActions:
         self.UpdateGroupQuery = actions.ResourceGroupsUpdateGroupQuery()
 
 
-class Route53Actions:
+class Route53:
     def __init__(self):
         self.all = IamAction("route53",  all=True)
         self.AssociateVPCWithHostedZone = actions.Route53AssociateVPCWithHostedZone()
@@ -3483,7 +3483,7 @@ class Route53Actions:
         self.UpdateTrafficPolicyInstance = actions.Route53UpdateTrafficPolicyInstance()
 
 
-class Route53DomainsActions:
+class Route53Domains:
     def __init__(self):
         self.all = IamAction("route53domains",  all=True)
         self.CheckDomainAvailability = actions.Route53DomainsCheckDomainAvailability()
@@ -3511,7 +3511,7 @@ class Route53DomainsActions:
         self.ViewBilling = actions.Route53DomainsViewBilling()
 
 
-class S3Actions:
+class S3:
     def __init__(self):
         self.all = IamAction("s3",  all=True)
         self.AbortMultipartUpload = actions.S3AbortMultipartUpload()
@@ -3585,7 +3585,7 @@ class S3Actions:
         self.RestoreObject = actions.S3RestoreObject()
 
 
-class SagemakerActions:
+class Sagemaker:
     def __init__(self):
         self.all = IamAction("sagemaker",  all=True)
         self.AddTags = actions.SagemakerAddTags()
@@ -3620,7 +3620,7 @@ class SagemakerActions:
         self.UpdateNotebookInstance = actions.SagemakerUpdateNotebookInstance()
 
 
-class SdbActions:
+class Sdb:
     def __init__(self):
         self.all = IamAction("sdb",  all=True)
         self.BatchDeleteAttributes = actions.SdbBatchDeleteAttributes()
@@ -3635,7 +3635,7 @@ class SdbActions:
         self.Select = actions.SdbSelect()
 
 
-class ServerlessrepoActions:
+class Serverlessrepo:
     def __init__(self):
         self.all = IamAction("serverlessrepo",  all=True)
         self.CreateApplication = actions.ServerlessrepoCreateApplication()
@@ -3651,7 +3651,7 @@ class ServerlessrepoActions:
         self.UpdateApplication = actions.ServerlessrepoUpdateApplication()
 
 
-class ServicecatalogActions:
+class Servicecatalog:
     def __init__(self):
         self.all = IamAction("servicecatalog",  all=True)
         self.AcceptPortfolioShare = actions.ServicecatalogAcceptPortfolioShare()
@@ -3699,7 +3699,7 @@ class ServicecatalogActions:
         self.UpdateProvisioningArtifact = actions.ServicecatalogUpdateProvisioningArtifact()
 
 
-class ServiceDiscoveryActions:
+class ServiceDiscovery:
     def __init__(self):
         self.all = IamAction("servicediscovery",  all=True)
         self.CreatePrivateDnsNamespace = actions.ServicediscoveryCreatePrivateDnsNamespace()
@@ -3722,7 +3722,7 @@ class ServiceDiscoveryActions:
         self.UpdateService = actions.ServicediscoveryUpdateService()
 
 
-class SesActions:
+class Ses:
     def __init__(self):
         self.all = IamAction("ses",  all=True)
         self.CloneReceiptRuleSet = actions.SesCloneReceiptRuleSet()
@@ -3797,7 +3797,7 @@ class SesActions:
         self.VerifyEmailIdentity = actions.SesVerifyEmailIdentity()
 
 
-class ShieldActions:
+class Shield:
     def __init__(self):
         self.all = IamAction("shield",  all=True)
         self.CreateProtection = actions.ShieldCreateProtection()
@@ -3811,7 +3811,7 @@ class ShieldActions:
         self.ListProtections = actions.ShieldListProtections()
 
 
-class SignerActions:
+class Signer:
     def __init__(self):
         self.all = IamAction("signer",  all=True)
         self.DescribeSigningJob = actions.SignerDescribeSigningJob()
@@ -3819,7 +3819,7 @@ class SignerActions:
         self.StartSigningJob = actions.SignerStartSigningJob()
 
 
-class SnowballActions:
+class Snowball:
     def __init__(self):
         self.all = IamAction("snowball",  all=True)
         self.CancelCluster = actions.SnowballCancelCluster()
@@ -3841,7 +3841,7 @@ class SnowballActions:
         self.UpdateJob = actions.SnowballUpdateJob()
 
 
-class SnsActions:
+class Sns:
     def __init__(self):
         self.all = IamAction("sns",  all=True)
         self.AddPermission = actions.SnsAddPermission()
@@ -3876,7 +3876,7 @@ class SnsActions:
         self.Unsubscribe = actions.SnsUnsubscribe()
 
 
-class SqsActions:
+class Sqs:
     def __init__(self):
         self.all = IamAction("sqs",  all=True)
         self.AddPermission = actions.SqsAddPermission()
@@ -3901,7 +3901,7 @@ class SqsActions:
         self.UntagQueue = actions.SqsUntagQueue()
 
 
-class SsmActions:
+class Ssm:
     def __init__(self):
         self.all = IamAction("ssm",  all=True)
         self.AddTagsToResource = actions.SsmAddTagsToResource()
@@ -4008,7 +4008,7 @@ class SsmActions:
         self.UpdatePatchBaseline = actions.SsmUpdatePatchBaseline()
 
 
-class SsoActions:
+class Sso:
     def __init__(self):
         self.all = IamAction("sso",  all=True)
         self.AssociateDirectory = actions.SsoAssociateDirectory()
@@ -4054,7 +4054,7 @@ class SsoActions:
         self.UpdateTrust = actions.SsoUpdateTrust()
 
 
-class StatesActions:
+class States:
     def __init__(self):
         self.all = IamAction("states",  all=True)
         self.CreateActivity = actions.StatesCreateActivity()
@@ -4078,7 +4078,7 @@ class StatesActions:
         self.UpdateStateMachine = actions.StatesUpdateStateMachine()
 
 
-class StorageGatewayActions:
+class StorageGateway:
     def __init__(self):
         self.all = IamAction("storagegateway",  all=True)
         self.ActivateGateway = actions.StoragegatewayActivateGateway()
@@ -4145,7 +4145,7 @@ class StorageGatewayActions:
         self.UpdateVTLDeviceType = actions.StoragegatewayUpdateVTLDeviceType()
 
 
-class StsActions:
+class Sts:
     def __init__(self):
         self.all = IamAction("sts",  all=True)
         self.AssumeRole = actions.StsAssumeRole()
@@ -4157,7 +4157,7 @@ class StsActions:
         self.GetSessionToken = actions.StsGetSessionToken()
 
 
-class SupportActions:
+class Support:
     def __init__(self):
         self.all = IamAction("support",  all=True)
         self.AddAttachmentsToSet = actions.SupportAddAttachmentsToSet()
@@ -4176,7 +4176,7 @@ class SupportActions:
         self.ResolveCase = actions.SupportResolveCase()
 
 
-class SwfActions:
+class Swf:
     def __init__(self):
         self.all = IamAction("swf",  all=True)
         self.CancelTimer = actions.SwfCancelTimer()
@@ -4224,7 +4224,7 @@ class SwfActions:
         self.TerminateWorkflowExecution = actions.SwfTerminateWorkflowExecution()
 
 
-class TagActions:
+class Tag:
     def __init__(self):
         self.all = IamAction("tag",  all=True)
         self.GetResources = actions.TagGetResources()
@@ -4234,7 +4234,7 @@ class TagActions:
         self.UntagResources = actions.TagUntagResources()
 
 
-class TranscribeActions:
+class Transcribe:
     def __init__(self):
         self.all = IamAction("transcribe",  all=True)
         self.GetTranscriptionJob = actions.TranscribeGetTranscriptionJob()
@@ -4242,13 +4242,13 @@ class TranscribeActions:
         self.StartTranscriptionJob = actions.TranscribeStartTranscriptionJob()
 
 
-class TranslateActions:
+class Translate:
     def __init__(self):
         self.all = IamAction("translate",  all=True)
         self.TranslateText = actions.TranslateTranslateText()
 
 
-class TrustedAdvisorActions:
+class TrustedAdvisor:
     def __init__(self):
         self.all = IamAction("trustedadvisor",  all=True)
         self.DescribeCheckItems = actions.TrustedadvisorDescribeCheckItems()
@@ -4261,7 +4261,7 @@ class TrustedAdvisorActions:
         self.UpdateNotificationPreferences = actions.TrustedadvisorUpdateNotificationPreferences()
 
 
-class WafRegionalActions:
+class WafRegional:
     def __init__(self):
         self.all = IamAction("waf-regional",  all=True)
         self.AssociateWebACL = actions.WafRegionalAssociateWebACL()
@@ -4329,7 +4329,7 @@ class WafRegionalActions:
         self.UpdateXssMatchSet = actions.WafRegionalUpdateXssMatchSet()
 
 
-class WafActions:
+class Waf:
     def __init__(self):
         self.all = IamAction("waf",  all=True)
         self.CreateByteMatchSet = actions.WafCreateByteMatchSet()
@@ -4393,13 +4393,13 @@ class WafActions:
         self.UpdateXssMatchSet = actions.WafUpdateXssMatchSet()
 
 
-class WamActions:
+class Wam:
     def __init__(self):
         self.all = IamAction("wam",  all=True)
         self.AuthenticatePackager = actions.WamAuthenticatePackager()
 
 
-class WorkDocsActions:
+class WorkDocs:
     def __init__(self):
         self.all = IamAction("workdocs",  all=True)
         self.AbortDocumentVersionUpload = actions.WorkdocsAbortDocumentVersionUpload()
@@ -4443,7 +4443,7 @@ class WorkDocsActions:
         self.UpdateUser = actions.WorkdocsUpdateUser()
 
 
-class WorkMailActions:
+class WorkMail:
     def __init__(self):
         self.all = IamAction("workmail",  all=True)
         self.AddMembersToGroup = actions.WorkmailAddMembersToGroup()
@@ -4484,7 +4484,7 @@ class WorkMailActions:
         self.WipeMobileDevice = actions.WorkmailWipeMobileDevice()
 
 
-class WorkspacesActions:
+class Workspaces:
     def __init__(self):
         self.all = IamAction("workspaces",  all=True)
         self.CreateTags = actions.WorkspacesCreateTags()
@@ -4503,7 +4503,7 @@ class WorkspacesActions:
         self.TerminateWorkspaces = actions.WorkspacesTerminateWorkspaces()
 
 
-class XrayActions:
+class Xray:
     def __init__(self):
         self.all = IamAction("xray",  all=True)
         self.BatchGetTraces = actions.XrayBatchGetTraces()
