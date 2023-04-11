@@ -1,5 +1,7 @@
 from aws_cdk import IResource
 import aws_cdk.aws_iam as iam
+from aws_cdk.aws_iam import Policy, PolicyProps
+from constructs import Construct
 
 from infraflow.cdk.arns import arn_for_resource, service_key_for_resource
 
@@ -143,3 +145,6 @@ class PolicyBuilder:
         )
         self.statements.append(statement)
         return statement
+
+    def build_cdk_policy(self, parent: Construct, id: str):
+        return Policy(parent, id, PolicyProps(statements=[s.to_cdk() for s in self.statements]))
