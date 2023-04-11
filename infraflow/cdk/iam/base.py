@@ -74,3 +74,72 @@ class IamStatement:
             resources=[r.resource_string for r in self.resources],
             effect=self.effect
         )
+
+
+class PolicyBuilder:
+    def __init__(self):
+        self.statements: list[IamStatement] = []
+
+    def allow_resource(self, resource: IResource):
+        statement = IamStatement(
+            effect=iam.Effect.ALLOW,
+            resources=[IamResource(resource)]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def allow_resources(self, resources: list[IResource]):
+        statement = IamStatement(
+            effect=iam.Effect.ALLOW,
+            resources=[IamResource(resource) for resource in resources]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def allow_on_all(self, service: str):
+        statement = IamStatement(
+            effect=iam.Effect.ALLOW,
+            resources=[IamResource(service=service, all=True)]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def allow_pattern(self, service: str, pattern: str):
+        statement = IamStatement(
+            effect=iam.Effect.ALLOW,
+            resources=[IamResource(service=service, pattern=pattern)]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def deny_resource(self, resource: IResource):
+        statement = IamStatement(
+            effect=iam.Effect.DENY,
+            resources=[IamResource(resource)]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def deny_resources(self, resources: list[IResource]):
+        statement = IamStatement(
+            effect=iam.Effect.DENY,
+            resources=[IamResource(resource) for resource in resources]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def deny_on_all(self, service: str):
+        statement = IamStatement(
+            effect=iam.Effect.DENY,
+            resources=[IamResource(service=service, all=True)]
+        )
+        self.statements.append(statement)
+        return statement
+
+    def deny_pattern(self, service: str, pattern: str):
+        statement = IamStatement(
+            effect=iam.Effect.DENY,
+            resources=[IamResource(service=service, pattern=pattern)]
+        )
+        self.statements.append(statement)
+        return statement
