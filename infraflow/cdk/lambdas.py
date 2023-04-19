@@ -1,6 +1,7 @@
 from aws_cdk import aws_lambda
 from aws_cdk import aws_sqs
 from aws_cdk import aws_lambda_event_sources as sources
+from aws_cdk.aws_ec2 import SubnetType
 from constructs import Construct, IConstruct
 
 from infraflow.cdk.core.service_stage import ServiceStageStack
@@ -10,10 +11,18 @@ registry = []
 
 
 class LambdaContext:
-    def __init__(self, stage: ServiceStageStack, path: str, runtime: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_9):
+    def __init__(self,
+                 stage: ServiceStageStack,
+                 path: str,
+                 runtime: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_9,
+                 vpc: bool = True,
+                 subnet_type: SubnetType = SubnetType.PRIVATE_WITH_EGRESS,
+                 tracing=aws_lambda.Tracing.ACTIVE
+                 ):
         self.runtime = runtime
         self.path = path
         self.stage = stage
+        self.default_sg = stage.default_sg
 
     # def to_cdk(self):
     #     return dict(
@@ -30,7 +39,8 @@ class LambdaContext:
                 handler=f"{handler.__module__}.{handler.__name__}",
                 scope=scope_override or self.stage,
                 code=aws_lambda.Code.from_asset(self.path),
-                runtime=self.runtime
+                runtime=self.runtime,
+                tracing=aws_lambda.Tracing.ACTIVE,
                 # function_name=''
         )
 

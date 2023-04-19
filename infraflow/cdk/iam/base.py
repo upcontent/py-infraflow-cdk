@@ -67,7 +67,7 @@ class IamStatement:
     def action(self, action: IamAction):
         self.actions.append(action)
 
-    def actions(self, actions: list[IamAction]):
+    def for_actions(self, *actions: IamAction):
         self.actions.extend(actions)
 
     def to_cdk(self):
