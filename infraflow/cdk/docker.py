@@ -4,20 +4,18 @@ from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_ecr_assets as assets
-from aws_cdk import aws_ec2 as ec2
-from constructs import Construct
+from aws_cdk.aws_ec2 import SubnetSelection
+from aws_cdk.aws_ecs import Cluster
 
-from infraflow.cdk import HasEnv
+from infraflow.cdk import ServiceStageStack
 from infraflow.cdk.core.construct import ConstructWithEnv
-from infraflow.cdk.vpc import get_vpc
+from infraflow.cdk.sg.patterns import SecurityGroupTarget
 
 
 class EcsCluster:
-    def __init__(self, scope: ConstructWithEnv, cluster_name: str, env: str):
+    def __init__(self, scope: ServiceStageStack, cluster_name: str, env: str):
         self.scope = scope
-        self.env = scope.env
-        ec2.Vpc()
-        vpc = (self.scope, env)
+        vpc = self.scope.env.vpc
 
         self.cluster = ecs.Cluster(self.scope, cluster_name, vpc=vpc)
 
@@ -36,9 +34,18 @@ class EcsCluster:
             listener_port=80,
             task_image_options=ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
                 image=ecs.ContainerImage.from_registry(ecr_image) if ecr_image else image if path else None,
-                container_name=f"{name}_image",
+                container_name=f"{name}_task",
                 container_port=80
             ),
+            security_groups=[
+                self.scope.security_groups.get_group(target=SecurityGroupTarget(
+                    self.cluster,
+                    id=name,
+                    cdk_type=Cluster,
+                    infraflow_pattern=self,
+                ))
+            ],
+            task_subnets=SubnetSelection(subnets=self.scope.env.subnets()),
             memory_limit_mib=memory_limit_mib,  # Default is 512
             public_load_balancer=True
         )  # Default is True

@@ -146,5 +146,5 @@ class PolicyBuilder:
         self.statements.append(statement)
         return statement
 
-    def build_cdk_policy(self, parent: Construct, id: str):
+    def build_cdk_policy(self, parent: Construct, id: str) -> Policy:
         return Policy(parent, id, PolicyProps(statements=[s.to_cdk() for s in self.statements]))
