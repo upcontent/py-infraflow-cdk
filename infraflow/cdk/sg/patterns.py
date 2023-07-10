@@ -71,13 +71,20 @@ class SecurityGroupPerResource(SecurityGroupStructurePattern):
 
 
 class Tiered(SecurityGroupStructurePattern):
-    def __init__(self, stack: ServiceStageStack):
+    def __init__(self, stack: ServiceStageStack, allow_all_within_app_group=True, allow_all_within_group: bool = False):
         super().__init__(stack)
         self.dbs = SecurityGroup(self.stack, 'DbSg')
         self.app = SecurityGroup(self.stack, 'AppSg')
         self.web = SecurityGroup(self.stack, 'WebSg')
         self.web.connections.allow_to(self.app)
         self.app.connections.allow_to(self.dbs)
+
+        if allow_all_within_group or allow_all_within_app_group:
+            self.app.connections.allow_to(self.app)
+
+        if allow_all_within_group:
+            self.dbs.connections.allow_to(self.dbs)
+            self.web.connections.allow_to(self.web)
 
     def get_group(
             self,

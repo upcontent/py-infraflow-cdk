@@ -2,6 +2,7 @@ from aws_cdk import aws_lambda
 from aws_cdk import aws_sqs
 from aws_cdk import aws_lambda_event_sources as sources
 from aws_cdk.aws_ec2 import SubnetType
+from aws_cdk.aws_lambda import IEventSource
 from constructs import Construct, IConstruct
 
 from infraflow.cdk.core.service_stage import ServiceStageStack
@@ -54,6 +55,15 @@ class LambdaContext:
         queued_function.queue = queue
         queued_function.function = func
         return queued_function
+
+    def scheduled_function(self, handler, frequency, name=None, suffix=None):
+        raise NotImplemented()
+
+    def api_function(self, handler, name=None, suffix=None):
+        raise NotImplemented()
+
+    def function_with_source(self, handle, event_source: IEventSource, name=None, suffix=None):
+        raise NotImplemented()
 
 
 class QueueFunctionConstruct(Construct):

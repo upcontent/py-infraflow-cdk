@@ -73,13 +73,12 @@ def test_sqs_queue_created(snapshot):
     internal_policy.allow_resource(sns_topic).for_actions(
         actions.Sns.Publish
     )
-    internal_policy.build_cdk_policy(stack, 'internal-policy')
+    ip = internal_policy.build_cdk_policy(stack, 'internal-policy')
 
     external_policy.allow_resource(bus_cdk).for_actions(
         actions.Events.PutEvents
     )
-    external_policy.build_cdk_policy(stack, 'external-policy')
-
+    ep = external_policy.build_cdk_policy(stack, 'external-policy')
 
 
 
