@@ -4,10 +4,12 @@ from aws_cdk import App
 import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
 import aws_cdk.aws_events as events
+from aws_cdk.aws_ec2 import InterfaceVpcEndpointAwsService
 from aws_cdk.aws_iam import IRole, Role, Policy, ManagedPolicy
 from aws_cdk.aws_stepfunctions import IStateMachine
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
+from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
 from infraflow.cdk.events import EventBridgeEventBus, InfraflowEventBus
 from infraflow.cdk.iam import PolicyBuilder, action_groups
@@ -23,8 +25,10 @@ class StandardServiceStage(ServiceStageStack):
                  env: EnvConfig,
                  src_path: str = "src",
                  python_version: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_9,
+                 vpc_endpoint_services: list[InterfaceVpcEndpointAwsService] = DEFAULT_INTERFACE_SERVICES,
                  **kwargs):
         super().__init__(app, service_name, stage_name, env, **kwargs)
+        self.vpc_endpoint_services = vpc_endpoint_services
         self._app_role = None
         self._event_publish_policy = None
         self.python_version = python_version
@@ -122,3 +126,7 @@ class StandardServiceStage(ServiceStageStack):
             self._event_bridge_bus_cdk.grant_put_events_to(self._app_role)
         return self._app_role
 
+    def setup_endpoint_access(self):
+        interfaces = self.env.service_endpoints(self.vpc_endpoint_services)
+        for x in interfaces:
+            self.security_groups.app.connections.allow_to(x)

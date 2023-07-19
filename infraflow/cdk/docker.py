@@ -1,19 +1,15 @@
-from typing import TypeVar
-
 from aws_cdk import aws_ecs as ecs
-from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_ecr_assets as assets
 from aws_cdk.aws_ec2 import SubnetSelection
 from aws_cdk.aws_ecs import Cluster
 
 from infraflow.cdk import ServiceStageStack
-from infraflow.cdk.core.construct import ConstructWithEnv
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
 
 
 class EcsCluster:
-    def __init__(self, scope: ServiceStageStack, cluster_name: str, env: str):
+    def __init__(self, scope: ServiceStageStack, cluster_name: str):
         self.scope = scope
         vpc = self.scope.env.vpc
 
@@ -49,3 +45,4 @@ class EcsCluster:
             memory_limit_mib=memory_limit_mib,  # Default is 512
             public_load_balancer=True
         )  # Default is True
+
