@@ -34,7 +34,7 @@ class StandardServiceStage(ServiceStageStack):
         self.python_version = python_version
         self.src_path = src_path
         self._lambda_context: Optional[LambdaContext] = None
-        self._api:Optional[ apigateway.IRestApi] = None
+        self._api:Optional[apigateway.IRestApi] = None
         self._event_bridge_bus_cdk: Optional[events.IEventBus] = None
         self._bus: Optional[EventBridgeEventBus] = None
         self._ecs_cluster: Optional[EcsCluster] = None
