@@ -189,7 +189,7 @@ class InfraflowEventBus(Generic[T]):
         pass
 
 
-class EventBridgeEventBus(InfraflowEventBus[events.IEventBus]):
+class EventBridgeEvents(InfraflowEventBus[events.IEventBus]):
     def __init__(self, stage: ServiceStageStack, bus_id, bus: events.IEventBus):
         super().__init__(stage, bus_id, bus)
 
@@ -197,7 +197,7 @@ class EventBridgeEventBus(InfraflowEventBus[events.IEventBus]):
         return EventBridgeEvent(self.stage, self.bus_id, event_key, self.bus)
 
 
-class SnsEventBus(InfraflowEventBus[sns.ITopic]):
+class SnsEvents(InfraflowEventBus[sns.ITopic]):
     def __init__(self, stage: ServiceStageStack, bus_id, bus: sns.ITopic):
         super().__init__(stage, bus_id, bus)
 

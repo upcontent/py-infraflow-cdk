@@ -13,7 +13,7 @@ from infraflow.cdk.iam import actions
 import os.path
 import json
 
-from infraflow.cdk.events import EventBridgeEventBus
+from infraflow.cdk.events import EventBridgeEvents
 from infraflow.cdk.iam import PolicyBuilder
 from infraflow.cdk.lambdas import LambdaContext
 from infraflow.cdk.sg.patterns import Tiered
@@ -53,7 +53,7 @@ def test_sqs_queue_created(snapshot):
     stack = ServiceStageStack(app, service_name='MyService', stage_name='QA', env=env)
     stack.security_groups = Tiered(stack, db_ports=[postgres_port])
     bus_cdk = events.EventBus(stack, 'MyBus')
-    bus = EventBridgeEventBus(stack, 'MyBus', bus_cdk)
+    bus = EventBridgeEvents(stack, 'MyBus', bus_cdk)
     lambda_context = LambdaContext(stack, 'tests')
 
     added = bus.event('added')

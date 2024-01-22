@@ -14,7 +14,7 @@ from infraflow.cdk.iam import actions
 import os.path
 import json
 
-from infraflow.cdk.events import EventBridgeEventBus
+from infraflow.cdk.events import EventBridgeEvents
 from infraflow.cdk.iam import PolicyBuilder
 from infraflow.cdk.lambdas import LambdaContext
 from infraflow.cdk.sg.patterns import Tiered
@@ -51,16 +51,16 @@ def test_sqs_queue_created(snapshot):
     stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=env)
     stack.security_groups = Tiered(stack, db_ports=[postgres_port])
 
-    added = stack.bus.event('added')
+    added = stack.events.event('added')
     added.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='added').queue)
 
-    amplify_express = stack.bus.event('updated').with_true_prop('x').express_only()
+    amplify_express = stack.events.event('updated').with_true_prop('x').express_only()
     amplify_express.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='express').queue)
 
-    amplify_default = stack.bus.event('updated').with_true_prop('x').non_express()
+    amplify_default = stack.events.event('updated').with_true_prop('x').non_express()
     amplify_default.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='default').queue)
 
-    stack.bus.event('updated').with_true_prop('y').subscribe(
+    stack.events.event('updated').with_true_prop('y').subscribe(
         stack.lambda_context.queued_function(my_test_function, suffix='update-y').queue
     )
 

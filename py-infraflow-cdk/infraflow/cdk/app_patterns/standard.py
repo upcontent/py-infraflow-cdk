@@ -1,9 +1,9 @@
 from typing import Optional
 
-from aws_cdk import App
+from aws_cdk import App, aws_sns
 import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
-import aws_cdk.aws_events as events
+import aws_cdk.aws_events as aws_events
 from aws_cdk.aws_ec2 import InterfaceVpcEndpointAwsService
 from aws_cdk.aws_iam import IRole, Role, Policy, ManagedPolicy
 from aws_cdk.aws_stepfunctions import IStateMachine
@@ -11,7 +11,7 @@ from aws_cdk.aws_stepfunctions import IStateMachine
 from infraflow.cdk import ServiceStageStack, EnvConfig
 from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
-from infraflow.cdk.events import EventBridgeEventBus, InfraflowEventBus
+from infraflow.cdk.events import EventBridgeEvents, InfraflowEventBus, SnsEvents
 from infraflow.cdk.iam import PolicyBuilder, action_groups
 from infraflow.cdk.lambdas import LambdaContext
 from infraflow.cdk.sg.patterns import Tiered
@@ -35,9 +35,10 @@ class StandardServiceStage(ServiceStageStack):
         self.src_path = src_path
         self._lambda_context: Optional[LambdaContext] = None
         self._api:Optional[apigateway.IRestApi] = None
-        self._event_bridge_bus_cdk: Optional[events.IEventBus] = None
-        self._bus: Optional[EventBridgeEventBus] = None
+        self._event_bridge_bus_cdk: Optional[aws_events.IEventBus] = None
+        self._events: Optional[EventBridgeEvents] = None
         self._ecs_cluster: Optional[EcsCluster] = None
+        self.__sns_bus_ckd: Optional[aws_sns.Topic] = None
         self.security_groups: Tiered = Tiered(self)
 
     @property
@@ -49,22 +50,38 @@ class StandardServiceStage(ServiceStageStack):
         self._api = self._api or apigateway.RestApi(self, "API")
 
     @property
-    def bus(self) -> InfraflowEventBus:
+    def events(self) -> InfraflowEventBus:
         self.use_bus()
-        return self._bus
+        return self._events
 
-    def use_bus(self):
-        self._bus = self._bus or EventBridgeEventBus(self, 'Events', self.event_bridge_bus_cdk)
+    def use_events(self):
+        if not self._event_bridge_bus_cdk and not self._sns_bus_ckd:
+            self.use_event_bridge()
+
+        self._events = self._events or (
+            EventBridgeEvents(self, 'Events', self._event_bridge_bus_cdk) if self._event_bridge_bus_cdk else
+            SnsEvents(self, 'Events', self._sns_bus_ckd) if self._sns_bus_ckd else
+            None
+        )
+
         if self._event_bridge_bus_cdk and self._app_role:
             self._event_bridge_bus_cdk.grant_put_events_to(self._app_role)
 
     @property
-    def event_bridge_bus_cdk(self) -> events.IEventBus:
+    def event_bridge_bus(self) -> aws_events.IEventBus:
         self.use_event_bridge()
         return self._event_bridge_bus_cdk
 
     def use_event_bridge(self):
-        self._event_bridge_bus_cdk = self._event_bridge_bus_cdk or events.EventBus(self, "Bus")
+        self._event_bridge_bus_cdk = self._event_bridge_bus_cdk or aws_events.EventBus(self, "Bus")
+
+    @property
+    def sns_bus(self) -> aws_events.IEventBus:
+        self.use_sns()
+        return self._sns_bus_ckd
+
+    def use_sns(self):
+        self._sns_bus_ckd = self._sns_bus_ckd or aws_sns.Topic(self, "SnsTopic")
 
     @property
     def default_lambda_context(self) -> LambdaContext:
