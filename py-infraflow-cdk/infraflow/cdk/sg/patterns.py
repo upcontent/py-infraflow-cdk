@@ -1,7 +1,5 @@
 from aws_cdk.aws_ec2 import SecurityGroup
 from constructs import Construct, IConstruct
-
-from infraflow.cdk import ServiceStageStack
 from infraflow.cdk.sg import tier_maps
 
 
@@ -29,7 +27,7 @@ class SecurityGroupTarget:
 
 
 class SecurityGroupStructurePattern:
-    def __init__(self, stack: ServiceStageStack):
+    def __init__(self, stack):
         self.stack = stack
 
     def get_group(
@@ -43,7 +41,7 @@ class SecurityGroupStructurePattern:
 
 
 class SingleSecurityGroup(SecurityGroupStructurePattern):
-    def __init__(self, stack: ServiceStageStack):
+    def __init__(self, stack):
         super().__init__(stack)
 
     def get_group(
@@ -57,7 +55,7 @@ class SingleSecurityGroup(SecurityGroupStructurePattern):
 
 
 class SecurityGroupPerResource(SecurityGroupStructurePattern):
-    def __init__(self, stack: ServiceStageStack):
+    def __init__(self, stack):
         super().__init__(stack)
 
     def get_group(
@@ -71,9 +69,9 @@ class SecurityGroupPerResource(SecurityGroupStructurePattern):
 
 
 class Tiered(SecurityGroupStructurePattern):
-    def __init__(self, stack: ServiceStageStack, allow_all_within_app_group=True, allow_all_within_group: bool = False):
+    def __init__(self, stack, allow_all_within_app_group=True, allow_all_within_group: bool = False):
         super().__init__(stack)
-        self.dbs = SecurityGroup(self.stack, 'DbSg')
+        self.dbs = SecurityGroup(self.stack, 'DbSg', vpc=self.stack.env.vpc)
         self.app = SecurityGroup(self.stack, 'AppSg')
         self.web = SecurityGroup(self.stack, 'WebSg')
         self.web.connections.allow_to(self.app)

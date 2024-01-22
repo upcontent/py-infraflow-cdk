@@ -1,4 +1,4 @@
-from infraflow.cdk.iam import IamAction
+from infraflow.cdk.iam.base import IamAction
 
 
 class A4BAssociateDeviceWithRoom(IamAction):
