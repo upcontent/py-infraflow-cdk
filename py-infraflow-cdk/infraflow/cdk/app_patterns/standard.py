@@ -1,6 +1,6 @@
 from typing import Optional
 
-from aws_cdk import App, aws_sns
+from aws_cdk import App, aws_sns, IResource
 import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
 import aws_cdk.aws_events as aws_events
@@ -12,9 +12,10 @@ from infraflow.cdk import ServiceStageStack, EnvConfig
 from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
 from infraflow.cdk.events import EventBridgeEvents, InfraflowEventBus, SnsEvents
-from infraflow.cdk.iam import PolicyBuilder, action_groups
+from infraflow.cdk.iam import PolicyBuilder, action_groups, IamAction
 from infraflow.cdk.lambdas import LambdaContext
 from infraflow.cdk.sg.patterns import Tiered
+from infraflow.cdk.sg.ports import port_for
 
 
 class StandardServiceStage(ServiceStageStack):
@@ -135,6 +136,14 @@ class StandardServiceStage(ServiceStageStack):
     @property
     def web_group(self):
         return self.security_groups.web
+
+    def use_external_resource(self, resource: IResource, actions: list[IamAction]=None):
+        self.app_group.connections.allow_to(resource, port_range=port_for(resource))
+        if actions and len(actions):
+            policy = PolicyBuilder()
+            policy.allow_resource(resource).for_actions(actions)
+            self.app_role.attach_inline_policy(policy)
+
 
     @property
     def app_role(self) -> IRole:
