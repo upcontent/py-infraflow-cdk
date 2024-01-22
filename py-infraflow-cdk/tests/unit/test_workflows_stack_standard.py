@@ -48,8 +48,7 @@ def test_sqs_queue_created(snapshot):
         vpc_id="upcontent-test",
         environment_variables={}
     )
-    stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=env)
-    stack.security_groups = Tiered(stack, db_ports=[postgres_port])
+    stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=env, db_ports=[postgres_port])
 
     added = stack.events.event('added')
     added.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='added').queue)

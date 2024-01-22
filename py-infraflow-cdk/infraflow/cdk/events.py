@@ -26,6 +26,17 @@ class Rule:
         self.values = values
         self.property = property
 
+    def id(self):
+        values=(
+            self.value if self.value else
+            "Exists" if self.exists else
+            "NotExists" if self.exists is False else
+            "".join(self.values) if self.values else
+            f"{self.range[0]}To{self.range[1]}" if self.range else
+            "Other"
+        )
+        return f"{self.property}{values}"
+
     def event_bridge_rule(self):
         return self.event_bridge or self.generic or (
             self.values if self.values else [
@@ -113,13 +124,7 @@ class Event:
 
     @property
     def id(self):
-        def filter_name(f: dict):
-            def prop_name(k, v):
-                return f"{caps_camel(k)}{caps_camel(v)}"
-
-            return "".join(prop_name(k, v) for k, v in f.items())
-
-        filters_string = ''.join([filter_name(f) for f in self.filters])
+        filters_string = ''.join([f.id() for f in self.filters])
         return f"{caps_camel(self.bus_id)}{caps_camel(self.event_key)}{filters_string}"
 
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
