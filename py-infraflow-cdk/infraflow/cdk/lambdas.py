@@ -42,11 +42,11 @@ class LambdaContext:
     #         runtime=self.runtime
     #     )
 
-    def function(self, handler: callable, name=None, suffix=None, scope_override: IConstruct = None):
+    def function(self, handler: str, name=None, suffix=None, scope_override: IConstruct = None):
         constructed_name = self.construct_name(handler, name, suffix)
         func = aws_lambda.Function(
                 id=constructed_name,
-                handler=f"{handler.__module__}.{handler.__name__}",
+                handler=handler,
                 scope=scope_override or self.stage,
                 code=aws_lambda.Code.from_asset(self.path),
                 runtime=self.runtime,
@@ -68,8 +68,8 @@ class LambdaContext:
             func.grant_invoke(self.role)
         return func
 
-    def construct_name(self, handler, name, suffix):
-        base_name = name or caps_camel(handler.__name__)
+    def construct_name(self, handler: str, name: str, suffix: str):
+        base_name = name or caps_camel(handler.split(".")[1])
         constructed_name = caps_camel(f"{base_name}_{suffix}" if suffix else base_name)
         return constructed_name
 

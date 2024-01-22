@@ -49,18 +49,18 @@ def test_sqs_queue_created(snapshot):
         environment_variables={}
     )
     stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=env, db_ports=[postgres_port])
-
+    stack.lambda_context.path = 'tests'
     added = stack.events.event('added')
-    added.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='added').queue)
+    added.subscribe(stack.lambda_context.queued_function("service/handler.my_test_function", suffix='added').queue)
 
     amplify_express = stack.events.event('updated').with_true_prop('x').express_only()
-    amplify_express.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='express').queue)
+    amplify_express.subscribe(stack.lambda_context.queued_function("service/handler.my_test_function", suffix='express').queue)
 
     amplify_default = stack.events.event('updated').with_true_prop('x').non_express()
-    amplify_default.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='default').queue)
+    amplify_default.subscribe(stack.lambda_context.queued_function("service/handler.my_test_function", suffix='default').queue)
 
     stack.events.event('updated').with_true_prop('y').subscribe(
-        stack.lambda_context.queued_function(my_test_function, suffix='update-y').queue
+        stack.lambda_context.queued_function("service/handler.my_test_function", suffix='update-y').queue
     )
 
     template = assertions.Template.from_stack(stack)

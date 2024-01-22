@@ -57,16 +57,16 @@ def test_sqs_queue_created(snapshot):
     lambda_context = LambdaContext(stack, 'tests')
 
     added = bus.event('added')
-    added.subscribe(lambda_context.queued_function(my_test_function, suffix='added').queue)
+    added.subscribe(lambda_context.queued_function("service/handler.my_test_function", suffix='added').queue)
 
     amplify_express = bus.event('updated').with_true_prop('x').express_only()
-    amplify_express.subscribe(lambda_context.queued_function(my_test_function, suffix='express').queue)
+    amplify_express.subscribe(lambda_context.queued_function("service/handler.my_test_function", suffix='express').queue)
 
     amplify_default = bus.event('updated').with_true_prop('x').non_express()
-    amplify_default.subscribe(lambda_context.queued_function(my_test_function, suffix='default').queue)
+    amplify_default.subscribe(lambda_context.queued_function("service/handler.my_test_function", suffix='default').queue)
 
     bus.event('updated').with_true_prop('y').subscribe(
-        lambda_context.queued_function(my_test_function, suffix='update-y').queue
+        lambda_context.queued_function("service/handler.my_test_function", suffix='update-y').queue
     )
 
     print('stack created')
