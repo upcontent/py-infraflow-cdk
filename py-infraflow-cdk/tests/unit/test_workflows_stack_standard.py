@@ -4,6 +4,7 @@ from aws_cdk import aws_events as events
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_sns as sns
 from aws_cdk import aws_ec2 as ec2
+from aws_cdk import Environment
 import pytest_snapshot
 
 from infraflow.cdk import ServiceStageStack
@@ -16,6 +17,8 @@ import json
 from infraflow.cdk.events import EventBridgeEventBus
 from infraflow.cdk.iam import PolicyBuilder
 from infraflow.cdk.lambdas import LambdaContext
+from infraflow.cdk.sg.patterns import Tiered
+from infraflow.cdk.sg.ports import postgres_port
 from tests.unit.lambda_test_code import my_test_function
 
 script_path = os.path.realpath(__file__)
@@ -40,7 +43,13 @@ class ExternalResources:
 
 def test_sqs_queue_created(snapshot):
     app = core.App()
-    stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=EnvConfig(vpc_id=""))
+    env = EnvConfig(
+        env=Environment(account="upcontent-test", region="upcontent-test"),
+        vpc_id="upcontent-test",
+        environment_variables={}
+    )
+    stack = StandardServiceStage(app, service_name='MyService', stage_name='QA', env=env)
+    stack.security_groups = Tiered(stack, db_ports=[postgres_port])
 
     added = stack.bus.event('added')
     added.subscribe(stack.lambda_context.queued_function(my_test_function, suffix='added').queue)

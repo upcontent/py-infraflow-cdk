@@ -15,7 +15,7 @@ class ServiceStageStack(Stack, HasEnv, HasDefaultSg):
             env: EnvConfig,
             **kwargs
     ):
-        super().__init__(app, f"{stage_name}-{service_name}", **kwargs)
+        super().__init__(app, f"{stage_name}-{service_name}", env=env.env, **kwargs)
         self.service_name = service_name
         self.stage_name = stage_name
         self.scope = app

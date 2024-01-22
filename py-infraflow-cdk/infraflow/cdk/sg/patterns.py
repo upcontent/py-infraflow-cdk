@@ -1,6 +1,7 @@
-from aws_cdk.aws_ec2 import SecurityGroup
+from aws_cdk.aws_ec2 import SecurityGroup, Port
 from constructs import Construct, IConstruct
 from infraflow.cdk.sg import tier_maps
+from infraflow.cdk.sg.ports import all_tcp
 
 
 class SecurityGroupNeeds:
@@ -69,20 +70,22 @@ class SecurityGroupPerResource(SecurityGroupStructurePattern):
 
 
 class Tiered(SecurityGroupStructurePattern):
-    def __init__(self, stack, allow_all_within_app_group=True, allow_all_within_group: bool = False):
+    def __init__(self, stack, db_ports: list[Port], app_web_ports: list[Port] = [all_tcp], allow_all_within_app_group=True, allow_all_within_group: bool = False):
         super().__init__(stack)
         self.dbs = SecurityGroup(self.stack, 'DbSg', vpc=self.stack.env.vpc)
-        self.app = SecurityGroup(self.stack, 'AppSg')
-        self.web = SecurityGroup(self.stack, 'WebSg')
-        self.web.connections.allow_to(self.app)
-        self.app.connections.allow_to(self.dbs)
+        self.app = SecurityGroup(self.stack, 'AppSg', vpc=self.stack.env.vpc)
+        self.web = SecurityGroup(self.stack, 'WebSg', vpc=self.stack.env.vpc)
+        for port in app_web_ports:
+            self.web.connections.allow_to(self.app, port)
+        for port in db_ports:
+            self.app.connections.allow_to(self.dbs, port)
 
         if allow_all_within_group or allow_all_within_app_group:
-            self.app.connections.allow_to(self.app)
+            self.app.connections.allow_to(self.app, Port.all_tcp())
 
         if allow_all_within_group:
-            self.dbs.connections.allow_to(self.dbs)
-            self.web.connections.allow_to(self.web)
+            self.dbs.connections.allow_to(self.dbs, Port.all_tcp())
+            self.web.connections.allow_to(self.web, Port.all_tcp())
 
     def get_group(
             self,

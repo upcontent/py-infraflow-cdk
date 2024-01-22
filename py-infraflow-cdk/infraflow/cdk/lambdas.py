@@ -58,7 +58,7 @@ class LambdaContext:
                         infraflow_pattern=self,
                     ))
                 ],
-                vpc_subnets=SubnetSelection(subnets=self.stage.env.subnets()),
+                vpc_subnets=SubnetSelection(subnets=self.stage.env.vpc_subnets()),
                 vpc=self.stage.env.vpc,
                 tracing=aws_lambda.Tracing.ACTIVE,
                 role=self.role

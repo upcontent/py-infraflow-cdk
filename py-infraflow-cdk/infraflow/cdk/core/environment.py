@@ -1,4 +1,5 @@
 from typing import Union, Optional
+from aws_cdk import Environment as CdkEnv
 from enum import Enum
 import boto3
 
@@ -21,7 +22,10 @@ class IEnv:
     def vpc(self) -> IVpc:
         raise NotImplemented()
 
-    def subnets(self, subnet_type=None) -> list[ISubnet]:
+    def vpc_subnets(self, subnet_type=None) -> list[ISubnet]:
+        raise NotImplemented()
+
+    def service_subnets(self, subnet_type: SubnetType):
         raise NotImplemented()
 
     def get_secret(self, key) -> str:
@@ -41,10 +45,12 @@ class IEnv:
 class EnvConfig:
     def __init__(
             self,
+            env: CdkEnv,
             vpc_id: str,
             subnet_map: dict[SubnetType, list[str]] = None,
             environment_variables: dict[str, str] = {}
     ):
+        self.env = env
         self.environment_variables = environment_variables
         self.vpc_id = vpc_id
         self.subnet_map = subnet_map
@@ -57,13 +63,14 @@ class Env(IEnv):
         self.scope = scope
         self.secrets_manager = boto3.client('secretsmanager')
         self.ssm = boto3.client('ssm')
+        self._vpc = Vpc.from_lookup(self.scope, "VPC", vpc_id=self.config.vpc_id)
 
     @property
     def vpc(self) -> IVpc:
-        return Vpc.from_lookup(self.scope, "VPC", vpc_id=self.config.vpc_id)
+        return self._vpc
 
     def vpc_subnets(self, subnet_type: SubnetType=None) -> list[ISubnet]:
-        return self.vpc.select_subnets(subnet_type).subnets
+        return self.vpc.select_subnets(subnet_type=subnet_type).subnets
 
     def service_subnets(self, subnet_type: SubnetType):
         vpc_subnets = self.vpc_subnets(subnet_type)

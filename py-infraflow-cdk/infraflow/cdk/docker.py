@@ -41,7 +41,7 @@ class EcsCluster:
                     infraflow_pattern=self,
                 ))
             ],
-            task_subnets=SubnetSelection(subnets=self.scope.env.subnets()),
+            task_subnets=SubnetSelection(subnets=self.scope.env.vpc_subnets()),
             memory_limit_mib=memory_limit_mib,  # Default is 512
             public_load_balancer=True
         )  # Default is True
