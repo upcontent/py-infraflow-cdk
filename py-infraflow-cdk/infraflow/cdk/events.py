@@ -41,7 +41,7 @@ class Rule:
         return self.event_bridge or self.generic or (
             self.values if self.values else [
                 self.value if self.value and type(self.value) == str else
-                str(self.value) if self.value and type(self.value) == bool else
+                str(self.value) if type(self.value) == bool else
                 {"exists": self.exists} if self.exists is not None else
                 {"numeric": ["=", self.value]} if self.value and type(self.value) in [int, float] else
                 {"numeric": [">=", self.range[0], "<=", self.range[1]]} if self.range else

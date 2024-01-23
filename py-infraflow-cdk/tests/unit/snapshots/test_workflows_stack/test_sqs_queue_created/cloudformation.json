@@ -225,7 +225,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
+          "S3Key": "a70917a86a21922a2059ba42a7bb963a79872758167705851fe9e1d88a8cc350.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -432,7 +432,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
+          "S3Key": "a70917a86a21922a2059ba42a7bb963a79872758167705851fe9e1d88a8cc350.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -645,7 +645,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
+          "S3Key": "a70917a86a21922a2059ba42a7bb963a79872758167705851fe9e1d88a8cc350.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -704,7 +704,9 @@
             "x": {
               "equals-ignore-case": "true"
             },
-            "express": []
+            "express": [
+              "False"
+            ]
           }
         },
         "State": "ENABLED",
@@ -856,7 +858,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
+          "S3Key": "a70917a86a21922a2059ba42a7bb963a79872758167705851fe9e1d88a8cc350.zip"
         },
         "Role": {
           "Fn::GetAtt": [
