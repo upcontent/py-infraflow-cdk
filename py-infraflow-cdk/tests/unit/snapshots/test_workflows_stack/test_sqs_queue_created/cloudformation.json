@@ -1,5 +1,89 @@
 {
   "Resources": {
+    "DbSg495F8305": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "QA-MyService/DbSg",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": "vpc-12345"
+      }
+    },
+    "DbSgfromQAMyServiceAppSg640E3ED954321FF97612": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "Description": "from QAMyServiceAppSg640E3ED9:5432",
+        "FromPort": 5432,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "DbSg495F8305",
+            "GroupId"
+          ]
+        },
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "AppSg898BCA4E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 5432
+      }
+    },
+    "AppSg898BCA4E": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "QA-MyService/AppSg",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": "vpc-12345"
+      }
+    },
+    "AppSgfromQAMyServiceWebSg9A636068ALLPORTS102BED9B": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "Description": "from QAMyServiceWebSg9A636068:ALL PORTS",
+        "FromPort": 0,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "AppSg898BCA4E",
+            "GroupId"
+          ]
+        },
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "WebSg75AA54D5",
+            "GroupId"
+          ]
+        },
+        "ToPort": 65535
+      }
+    },
+    "WebSg75AA54D5": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "QA-MyService/WebSg",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": "vpc-12345"
+      }
+    },
     "MyBus7787FCC0": {
       "Type": "AWS::Events::EventBus",
       "Properties": {
@@ -80,6 +164,18 @@
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
               ]
             ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+              ]
+            ]
           }
         ]
       }
@@ -89,6 +185,14 @@
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
             {
               "Action": [
                 "sqs:ReceiveMessage",
@@ -120,10 +224,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-          },
-          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
+          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -131,8 +233,25 @@
             "Arn"
           ]
         },
-        "Handler": "tests.unit.lambda_test_code.my_test_function",
-        "Runtime": "python3.9"
+        "Handler": "service/handler.my_test_function",
+        "Runtime": "python3.9",
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "AppSg898BCA4E",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "p-12345",
+            "p-67890"
+          ]
+        }
       },
       "DependsOn": [
         "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA",
@@ -160,7 +279,9 @@
           "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
-          "detail": {}
+          "detail": {
+            "event": "added"
+          }
         },
         "State": "ENABLED",
         "Targets": [
@@ -196,7 +317,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedXTrueExpressTrue1E04CBFE",
+                      "MyBusUpdatedxOtherexpressTrue7C3D93B8",
                       "Arn"
                     ]
                   }
@@ -250,6 +371,18 @@
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
               ]
             ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+              ]
+            ]
           }
         ]
       }
@@ -259,6 +392,14 @@
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
             {
               "Action": [
                 "sqs:ReceiveMessage",
@@ -290,10 +431,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-          },
-          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
+          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -301,8 +440,25 @@
             "Arn"
           ]
         },
-        "Handler": "tests.unit.lambda_test_code.my_test_function",
-        "Runtime": "python3.9"
+        "Handler": "service/handler.my_test_function",
+        "Runtime": "python3.9",
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "AppSg898BCA4E",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "p-12345",
+            "p-67890"
+          ]
+        }
       },
       "DependsOn": [
         "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE",
@@ -323,14 +479,20 @@
         }
       }
     },
-    "MyBusUpdatedXTrueExpressTrue1E04CBFE": {
+    "MyBusUpdatedxOtherexpressTrue7C3D93B8": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
           "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
-          "detail": {}
+          "detail": {
+            "event": "updated",
+            "x": {
+              "equals-ignore-case": "true"
+            },
+            "express": []
+          }
         },
         "State": "ENABLED",
         "Targets": [
@@ -366,7 +528,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedXTrueExpressFalse19999060",
+                      "MyBusUpdatedxOtherexpressOtherB4D75E5B",
                       "Arn"
                     ]
                   }
@@ -420,6 +582,18 @@
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
               ]
             ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+              ]
+            ]
           }
         ]
       }
@@ -429,6 +603,14 @@
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
             {
               "Action": [
                 "sqs:ReceiveMessage",
@@ -460,10 +642,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-          },
-          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
+          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -471,8 +651,25 @@
             "Arn"
           ]
         },
-        "Handler": "tests.unit.lambda_test_code.my_test_function",
-        "Runtime": "python3.9"
+        "Handler": "service/handler.my_test_function",
+        "Runtime": "python3.9",
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "AppSg898BCA4E",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "p-12345",
+            "p-67890"
+          ]
+        }
       },
       "DependsOn": [
         "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9",
@@ -493,14 +690,20 @@
         }
       }
     },
-    "MyBusUpdatedXTrueExpressFalse19999060": {
+    "MyBusUpdatedxOtherexpressOtherB4D75E5B": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
           "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
-          "detail": {}
+          "detail": {
+            "event": "updated",
+            "x": {
+              "equals-ignore-case": "true"
+            },
+            "express": []
+          }
         },
         "State": "ENABLED",
         "Targets": [
@@ -536,7 +739,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedYTrue990470B0",
+                      "MyBusUpdatedyOtherB8696E84",
                       "Arn"
                     ]
                   }
@@ -590,6 +793,18 @@
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
               ]
             ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+              ]
+            ]
           }
         ]
       }
@@ -599,6 +814,14 @@
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
             {
               "Action": [
                 "sqs:ReceiveMessage",
@@ -630,10 +853,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-          },
-          "S3Key": "d9740b18ec8fb200b5e2d344f6fad78cc7348e79d348a33fc59bec9dff629aaf.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
+          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -641,8 +862,25 @@
             "Arn"
           ]
         },
-        "Handler": "tests.unit.lambda_test_code.my_test_function",
-        "Runtime": "python3.9"
+        "Handler": "service/handler.my_test_function",
+        "Runtime": "python3.9",
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "AppSg898BCA4E",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "p-12345",
+            "p-67890"
+          ]
+        }
       },
       "DependsOn": [
         "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6",
@@ -663,14 +901,19 @@
         }
       }
     },
-    "MyBusUpdatedYTrue990470B0": {
+    "MyBusUpdatedyOtherB8696E84": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
           "Ref": "MyBus7787FCC0"
         },
         "EventPattern": {
-          "detail": {}
+          "detail": {
+            "event": "updated",
+            "y": {
+              "equals-ignore-case": "true"
+            }
+          }
         },
         "State": "ENABLED",
         "Targets": [

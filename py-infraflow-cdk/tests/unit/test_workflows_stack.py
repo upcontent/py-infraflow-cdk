@@ -46,8 +46,8 @@ def test_sqs_queue_created(snapshot):
     print('Start test_sqs_queue_created')
     app = core.App()
     env = EnvConfig(
-        env=Environment(account="upcontent-test", region="upcontent-test"),
-        vpc_id="upcontent-test",
+        env=Environment(account="test-account-upc", region="test-region-upc"),
+        vpc_id="test-vpc-id-upc",
         environment_variables={}
     )
     stack = ServiceStageStack(app, service_name='MyService', stage_name='QA', env=env)
@@ -75,25 +75,25 @@ def test_sqs_queue_created(snapshot):
     snapshot.assert_match(json.dumps(template.to_json(), indent=2), 'cloudformation.json')
     print('assertion passed')
 
-    internal_sg = ec2.SecurityGroup(stack, 'sg')
-    internal_policy = PolicyBuilder()
-    external_policy = PolicyBuilder()
-
-    db = ExternalResources.db(stack)
-    sns_topic = ExternalResources.sns_topic(stack)
-
-    internal_sg.connections.allow_to(db)
-    internal_sg.connections.allow_to(sns_topic)
-
-    internal_policy.allow_resource(sns_topic).for_actions(
-        actions.Sns.Publish
-    )
-    ip = internal_policy.build_cdk_policy(stack, 'internal-policy')
-
-    external_policy.allow_resource(bus_cdk).for_actions(
-        actions.Events.PutEvents
-    )
-    ep = external_policy.build_cdk_policy(stack, 'external-policy')
+    # internal_sg = ec2.SecurityGroup(stack, 'sg')
+    # internal_policy = PolicyBuilder()
+    # external_policy = PolicyBuilder()
+    #
+    # db = ExternalResources.db(stack)
+    # sns_topic = ExternalResources.sns_topic(stack)
+    #
+    # internal_sg.connections.allow_to(db)
+    # internal_sg.connections.allow_to(sns_topic)
+    #
+    # internal_policy.allow_resource(sns_topic).for_actions(
+    #     actions.Sns.Publish
+    # )
+    # ip = internal_policy.build_cdk_policy(stack, 'internal-policy')
+    #
+    # external_policy.allow_resource(bus_cdk).for_actions(
+    #     actions.Events.PutEvents
+    # )
+    # ep = external_policy.build_cdk_policy(stack, 'external-policy')
 
     print('permissions created')
 
