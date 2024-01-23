@@ -66,25 +66,25 @@ def test_sqs_queue_created(snapshot):
     template = assertions.Template.from_stack(stack)
     snapshot.assert_match(json.dumps(template.to_json(), indent=2), 'cloudformation.json')
 
-    internal_sg = ec2.SecurityGroup(stack, 'sg')
-    internal_policy = PolicyBuilder()
-    external_policy = PolicyBuilder()
-
-    db = ExternalResources.db(stack)
-    sns_topic = ExternalResources.sns_topic(stack)
-
-    internal_sg.connections.allow_to(db)
-    internal_sg.connections.allow_to(sns_topic)
-
-    internal_policy.allow_resource(sns_topic).for_actions(
-        actions.Sns.Publish
-    )
-    ip = internal_policy.build_cdk_policy(stack, 'internal-policy')
-
-    external_policy.allow_resource(stack.event_bridge_bus_cdk).for_actions(
-        actions.Events.PutEvents
-    )
-    ep = external_policy.build_cdk_policy(stack, 'external-policy')
+    # internal_sg = ec2.SecurityGroup(stack, 'sg')
+    # internal_policy = PolicyBuilder()
+    # external_policy = PolicyBuilder()
+    #
+    # db = ExternalResources.db(stack)
+    # sns_topic = ExternalResources.sns_topic(stack)
+    #
+    # internal_sg.connections.allow_to(db)
+    # internal_sg.connections.allow_to(sns_topic)
+    #
+    # internal_policy.allow_resource(sns_topic).for_actions(
+    #     actions.Sns.Publish
+    # )
+    # ip = internal_policy.build_cdk_policy(stack, 'internal-policy')
+    #
+    # external_policy.allow_resource(stack.event_bridge_bus_cdk).for_actions(
+    #     actions.Events.PutEvents
+    # )
+    # ep = external_policy.build_cdk_policy(stack, 'external-policy')
 
 
 

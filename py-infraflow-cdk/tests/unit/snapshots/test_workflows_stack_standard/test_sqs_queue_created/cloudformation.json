@@ -84,10 +84,125 @@
         "VpcId": "vpc-12345"
       }
     },
-    "MyBus7787FCC0": {
+    "Role1ABCC5F0": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "RoleDefaultPolicy5FFB7DAB": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BusEA82B648",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MyTestFunctionAddedQueueCBCB31C5",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MyTestFunctionExpressQueueA88EFCB1",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MyTestFunctionDefaultQueue80D923AB",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MyTestFunctionUpdateyQueue3B9DFB11",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "RoleDefaultPolicy5FFB7DAB",
+        "Roles": [
+          {
+            "Ref": "Role1ABCC5F0"
+          }
+        ]
+      }
+    },
+    "BusEA82B648": {
       "Type": "AWS::Events::EventBus",
       "Properties": {
-        "Name": "QAMyServiceMyBus80F5CD58"
+        "Name": "QAMyServiceBus19C158F4"
       }
     },
     "MyTestFunctionAddedQueueCBCB31C5": {
@@ -110,7 +225,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusAdded8F8A47E9",
+                      "EventsAddedA320FAD5",
                       "Arn"
                     ]
                   }
@@ -137,99 +252,16 @@
         ]
       }
     },
-    "MyTestFunctionAddedFunctionServiceRole8B63461E": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-              ]
-            ]
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-              ]
-            ]
-          }
-        ]
-      }
-    },
-    "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "MyTestFunctionAddedQueueCBCB31C5",
-                  "Arn"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA",
-        "Roles": [
-          {
-            "Ref": "MyTestFunctionAddedFunctionServiceRole8B63461E"
-          }
-        ]
-      }
-    },
     "MyTestFunctionAddedFunction9B623D45": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "480f80cd216e7822f6643b761293284c85de278a1decc273a51543557c4ea071.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-upcontent-test-upcontent-test",
+          "S3Key": "ff136e6d2c0bb6a2d811f963269e4a8701342add262fae7a70ceabb0ce41177f.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "MyTestFunctionAddedFunctionServiceRole8B63461E",
+            "Role1ABCC5F0",
             "Arn"
           ]
         },
@@ -254,8 +286,8 @@
         }
       },
       "DependsOn": [
-        "MyTestFunctionAddedFunctionServiceRoleDefaultPolicy16BAA8FA",
-        "MyTestFunctionAddedFunctionServiceRole8B63461E"
+        "RoleDefaultPolicy5FFB7DAB",
+        "Role1ABCC5F0"
       ]
     },
     "MyTestFunctionAddedFunctionSqsEventSourceQAMyServiceMyTestFunctionAddedQueue1291348F82377587": {
@@ -272,11 +304,11 @@
         }
       }
     },
-    "MyBusAdded8F8A47E9": {
+    "EventsAddedA320FAD5": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "MyBus7787FCC0"
+          "Ref": "BusEA82B648"
         },
         "EventPattern": {
           "detail": {
@@ -317,7 +349,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedxOtherexpressTrue7C3D93B8",
+                      "EventsUpdatedxOtherexpressTrue2B580C7D",
                       "Arn"
                     ]
                   }
@@ -344,99 +376,16 @@
         ]
       }
     },
-    "MyTestFunctionExpressFunctionServiceRoleAD393FDD": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-              ]
-            ]
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-              ]
-            ]
-          }
-        ]
-      }
-    },
-    "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "MyTestFunctionExpressQueueA88EFCB1",
-                  "Arn"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE",
-        "Roles": [
-          {
-            "Ref": "MyTestFunctionExpressFunctionServiceRoleAD393FDD"
-          }
-        ]
-      }
-    },
     "MyTestFunctionExpressFunction39663FE6": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "480f80cd216e7822f6643b761293284c85de278a1decc273a51543557c4ea071.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-upcontent-test-upcontent-test",
+          "S3Key": "ff136e6d2c0bb6a2d811f963269e4a8701342add262fae7a70ceabb0ce41177f.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "MyTestFunctionExpressFunctionServiceRoleAD393FDD",
+            "Role1ABCC5F0",
             "Arn"
           ]
         },
@@ -461,8 +410,8 @@
         }
       },
       "DependsOn": [
-        "MyTestFunctionExpressFunctionServiceRoleDefaultPolicyB157CDAE",
-        "MyTestFunctionExpressFunctionServiceRoleAD393FDD"
+        "RoleDefaultPolicy5FFB7DAB",
+        "Role1ABCC5F0"
       ]
     },
     "MyTestFunctionExpressFunctionSqsEventSourceQAMyServiceMyTestFunctionExpressQueue15A0DB143B3C4F77": {
@@ -479,11 +428,11 @@
         }
       }
     },
-    "MyBusUpdatedxOtherexpressTrue7C3D93B8": {
+    "EventsUpdatedxOtherexpressTrue2B580C7D": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "MyBus7787FCC0"
+          "Ref": "BusEA82B648"
         },
         "EventPattern": {
           "detail": {
@@ -530,7 +479,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedxOtherexpressOtherB4D75E5B",
+                      "EventsUpdatedxOtherexpressOther61036CD2",
                       "Arn"
                     ]
                   }
@@ -557,99 +506,16 @@
         ]
       }
     },
-    "MyTestFunctionDefaultFunctionServiceRole6145AE0A": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-              ]
-            ]
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-              ]
-            ]
-          }
-        ]
-      }
-    },
-    "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "MyTestFunctionDefaultQueue80D923AB",
-                  "Arn"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9",
-        "Roles": [
-          {
-            "Ref": "MyTestFunctionDefaultFunctionServiceRole6145AE0A"
-          }
-        ]
-      }
-    },
     "MyTestFunctionDefaultFunction365A084E": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "480f80cd216e7822f6643b761293284c85de278a1decc273a51543557c4ea071.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-upcontent-test-upcontent-test",
+          "S3Key": "ff136e6d2c0bb6a2d811f963269e4a8701342add262fae7a70ceabb0ce41177f.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "MyTestFunctionDefaultFunctionServiceRole6145AE0A",
+            "Role1ABCC5F0",
             "Arn"
           ]
         },
@@ -674,8 +540,8 @@
         }
       },
       "DependsOn": [
-        "MyTestFunctionDefaultFunctionServiceRoleDefaultPolicyADA86BD9",
-        "MyTestFunctionDefaultFunctionServiceRole6145AE0A"
+        "RoleDefaultPolicy5FFB7DAB",
+        "Role1ABCC5F0"
       ]
     },
     "MyTestFunctionDefaultFunctionSqsEventSourceQAMyServiceMyTestFunctionDefaultQueue4E52EF460F05081F": {
@@ -692,11 +558,11 @@
         }
       }
     },
-    "MyBusUpdatedxOtherexpressOtherB4D75E5B": {
+    "EventsUpdatedxOtherexpressOther61036CD2": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "MyBus7787FCC0"
+          "Ref": "BusEA82B648"
         },
         "EventPattern": {
           "detail": {
@@ -743,7 +609,7 @@
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "MyBusUpdatedyOtherB8696E84",
+                      "EventsUpdatedyOther852BCD6A",
                       "Arn"
                     ]
                   }
@@ -770,99 +636,16 @@
         ]
       }
     },
-    "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-              ]
-            ]
-          },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-              ]
-            ]
-          }
-        ]
-      }
-    },
-    "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "xray:PutTraceSegments",
-                "xray:PutTelemetryRecords"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "MyTestFunctionUpdateyQueue3B9DFB11",
-                  "Arn"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6",
-        "Roles": [
-          {
-            "Ref": "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB"
-          }
-        ]
-      }
-    },
     "MyTestFunctionUpdateyFunction0730D187": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "480f80cd216e7822f6643b761293284c85de278a1decc273a51543557c4ea071.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-upcontent-test-upcontent-test",
+          "S3Key": "ff136e6d2c0bb6a2d811f963269e4a8701342add262fae7a70ceabb0ce41177f.zip"
         },
         "Role": {
           "Fn::GetAtt": [
-            "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB",
+            "Role1ABCC5F0",
             "Arn"
           ]
         },
@@ -887,8 +670,8 @@
         }
       },
       "DependsOn": [
-        "MyTestFunctionUpdateyFunctionServiceRoleDefaultPolicyF2CBB1B6",
-        "MyTestFunctionUpdateyFunctionServiceRoleAFAD65EB"
+        "RoleDefaultPolicy5FFB7DAB",
+        "Role1ABCC5F0"
       ]
     },
     "MyTestFunctionUpdateyFunctionSqsEventSourceQAMyServiceMyTestFunctionUpdateyQueue223FFFA334F5EF39": {
@@ -905,11 +688,11 @@
         }
       }
     },
-    "MyBusUpdatedyOtherB8696E84": {
+    "EventsUpdatedyOther852BCD6A": {
       "Type": "AWS::Events::Rule",
       "Properties": {
         "EventBusName": {
-          "Ref": "MyBus7787FCC0"
+          "Ref": "BusEA82B648"
         },
         "EventPattern": {
           "detail": {

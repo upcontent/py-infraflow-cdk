@@ -64,8 +64,8 @@ class LambdaContext:
                 role=self.role
                 # function_name=''
         )
-        if self.role:
-            func.grant_invoke(self.role)
+        # if self.role:
+        #     func.grant_invoke(self.role)
         return func
 
     def construct_name(self, handler: str, name: str, suffix: str):
