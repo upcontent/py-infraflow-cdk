@@ -225,7 +225,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
+          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -432,7 +432,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
+          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -491,7 +491,9 @@
             "x": {
               "equals-ignore-case": "true"
             },
-            "express": []
+            "express": [
+              "True"
+            ]
           }
         },
         "State": "ENABLED",
@@ -643,7 +645,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
+          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
         },
         "Role": {
           "Fn::GetAtt": [
@@ -854,7 +856,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-test-account-upc-test-region-upc",
-          "S3Key": "ab5fec2ec0db9bd8ba88cea9d552d7dbec38516f21304bd8ff1c77939fb42212.zip"
+          "S3Key": "1c44e3a4cdd367eece1910f3314612c259a1ffaa980da769d0da743a65f0fafc.zip"
         },
         "Role": {
           "Fn::GetAtt": [
