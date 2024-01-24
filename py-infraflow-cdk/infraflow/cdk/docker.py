@@ -4,7 +4,7 @@ from aws_cdk import aws_ecr_assets as assets
 from aws_cdk.aws_ec2 import SubnetSelection
 from aws_cdk.aws_ecs import Cluster
 
-from infraflow.cdk import ServiceStageStack
+from infraflow.cdk.core.service_stage import ServiceStageStack
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
 
 
