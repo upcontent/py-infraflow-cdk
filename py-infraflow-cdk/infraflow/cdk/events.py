@@ -192,7 +192,7 @@ class InfraflowEventBus(Generic[T]):
         self.stage = stage
 
     def event(self, event_key: str) -> Event:
-        pass
+        return Event(stage=self.stage, bus_id=self.bus_id, event_key=event_key)
 
 
 class EventBridgeEvents(InfraflowEventBus[events.IEventBus]):
