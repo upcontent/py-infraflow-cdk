@@ -16,7 +16,7 @@ password = <API_KEY>
 start a venv
 
 ```shell
-pip install build twin
+pip install build twine
 ```
 
 ```shell
