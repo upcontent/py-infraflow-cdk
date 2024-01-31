@@ -15,8 +15,10 @@ from aws_cdk import aws_events_targets as targets
 from infraflow.cdk.lambdas import QueueFunctionConstruct
 from infraflow.cdk.core.service_stage import ServiceStageStack
 
+
 class Rule:
-    def __init__(self, property, value=None, values=None, range=None, exists=None, event_bridge=None, sns=None, generic=None):
+    def __init__(self, property, value=None, values=None, range=None, exists=None, event_bridge=None, sns=None,
+                 generic=None):
         self.generic = generic
         self.sns = sns
         self.event_bridge = event_bridge
@@ -27,7 +29,7 @@ class Rule:
         self.property = property
 
     def id(self):
-        values=(
+        values = (
             self.value if self.value else
             "Exists" if self.exists else
             "NotExists" if self.exists is False else
@@ -54,12 +56,12 @@ class Rule:
             sns.SubscriptionFilter.string_filter(allowlist=self.values) if self.values else
             sns.SubscriptionFilter.string_filter(allowlist=[self.value]) if self.value and type(self.value) == str else
             sns.SubscriptionFilter.exists_filter(allowlist=[{"exists": self.exists}]) if self.exists is not None else
-            sns.SubscriptionFilter.numeric_filter(allowlist=["=", self.value]) if self.value and type(self.value) in [int, float] else
-            sns.SubscriptionFilter.numeric_filter(allowlist=[">=", self.range[0], "<=", self.range[1]]) if self.range else
+            sns.SubscriptionFilter.numeric_filter(allowlist=["=", self.value]) if self.value and type(self.value) in [
+                int, float] else
+            sns.SubscriptionFilter.numeric_filter(
+                allowlist=[">=", self.range[0], "<=", self.range[1]]) if self.range else
             None
         )
-
-
 
 
 class Event:
@@ -110,8 +112,10 @@ class Event:
         return self.priority
 
     def subscribe(self, *processors: Union[lambdas.Function, QueueFunctionConstruct, sqs.Queue]):
+        print("in infraflow/cdk/events/Event.subscribe()")
         subs = []
         for processor in processors:
+            print("processor found:", processor)
             if isinstance(processor, QueueFunctionConstruct):
                 queue, lam, sub = processor.queue, processor.function, processor.queue
             elif isinstance(processor, sqs.Queue):
@@ -166,13 +170,12 @@ class EventBridgeEvent(Event):
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         targets_ = [get_eb_target(subscriber) for subscriber in subscribers]
         rules = {r.property: r.event_bridge_rule() for r in self.filters}
-        return events.Rule(self.stage, self.id, event_bus=self.bus, targets=targets_, event_pattern={
-            "detail": {
-                "event": self.event_key,
+        return events.Rule(self.stage, self.id, event_bus=self.bus, targets=targets_, event_pattern=events.EventPattern(
+            detail={
+                "event": self.events(self.event_key),  # [sqs.Queue],  # self.event_key,
                 **rules
             }
-        })
-
+        ))
 
 
 def get_eb_target(subscriber: Union[sqs.Queue, lambdas.Function]):
