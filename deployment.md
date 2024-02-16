@@ -1,19 +1,22 @@
-### upload to PYPI
+### Uploading to PYPI
 ==========================
 
-create ~/.pypirc
+Create/edit ~/.pypirc
 ```rc
 [testpypi]
-username = **token**
+username = __token__
 password = <API_KEY>
 
 [pypi]
-username = **token**
+username = __token__
 password = <API_KEY>
-start a venv
 ```
+---
+
+start a venv
+
 ```shell
-pip install build twin
+pip install build twine
 ```
 
 ```shell
@@ -31,7 +34,5 @@ OR
 twine upload dist/*
 ```
 
-user/pass id deprecated - need API key
-
-should just work if .pypirc is configured properly to point to pypi account
-(edited)
+Standard username/password pypirc config is deprecated - need an API key
+As long as the .pypirc is configured properly to point to pypi account, the upload should now work.

@@ -15,7 +15,15 @@ class EcsCluster:
 
         self.cluster = ecs.Cluster(self.scope, cluster_name, vpc=vpc)
 
-    def service(self, name, ecr_image: str = None, path: str = None, count=1, cpu=256, memory_limit_mib=512):
+    def service(self,
+                name,
+                ecr_image: str = None,
+                path: str = None,
+                command=None,
+                count=1,
+                cpu=256,
+                memory_limit_mib=512
+                ):
         if path:
             image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=path)
             image = ecs.ContainerImage.from_docker_image_asset(image_asset)
@@ -31,7 +39,8 @@ class EcsCluster:
             task_image_options=ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
                 image=ecs.ContainerImage.from_registry(ecr_image) if ecr_image else image if path else None,
                 container_name=f"{name}_task",
-                container_port=80
+                container_port=80,
+                command=command
             ),
             security_groups=[
                 self.scope.security_groups.get_group(target=SecurityGroupTarget(
