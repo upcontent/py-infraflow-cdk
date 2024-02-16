@@ -13,6 +13,7 @@ redis = "^4.5.1"
 boto3 = "^1.26.93"
 pydantic = "^2.1.1"
 #aws-wsgi = "^0.2.7"
+structlog = "^24.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
