@@ -12,6 +12,7 @@ from aws_cdk.aws_lambda import IEventSource
 from constructs import Construct, IConstruct
 
 from infraflow.cdk.core.service_stage import ServiceStageStack
+from infraflow.cdk.core.utils import to_duration
 from infraflow.cdk.iam import PolicyBuilder, action_groups
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
 from infraflow.util import caps_camel
@@ -42,7 +43,15 @@ class LambdaContext:
     #         runtime=self.runtime
     #     )
 
-    def function(self, handler: str, name=None, suffix=None, scope_override: IConstruct = None):
+    def function(
+            self,
+            handler: str,
+            name=None,
+            suffix=None,
+            scope_override: IConstruct = None,
+            max_concurrency=None,
+            timeout: Union[datetime.timedelta, Duration, int]=datetime.timedelta(minutes=5)
+    ):
         constructed_name = self.construct_name(handler, name, suffix)
         func = aws_lambda.Function(
                 id=constructed_name,
@@ -50,6 +59,8 @@ class LambdaContext:
                 scope=scope_override or self.stage,
                 code=aws_lambda.Code.from_asset(self.path),
                 runtime=self.runtime,
+                reserved_concurrent_executions=max_concurrency,
+                timeout=to_duration(timeout),
                 security_groups=[
                     self.stage.security_groups.get_group(target=SecurityGroupTarget(
                         scope_override or self.stage,
@@ -73,12 +84,21 @@ class LambdaContext:
         constructed_name = caps_camel(f"{base_name}_{suffix}" if suffix else base_name)
         return constructed_name
 
-    def queued_function(self, handler, name=None, suffix=None, **queue_config):
+    def queued_function(
+            self,
+            handler,
+            name=None,
+            suffix=None,
+            max_concurrency=None,
+            batch_size=1,
+            timeout: Union[datetime.timedelta, Duration, int]=datetime.timedelta(minutes=5),
+            **queue_config
+    ):
         constructed_name = self.construct_name(handler, name, suffix)
         queued_function = QueueFunctionConstruct(self.stage, constructed_name)
-        queue = aws_sqs.Queue(queued_function, 'Queue', **queue_config)
-        func = self.function(handler, 'Function', scope_override=queued_function)
-        func.add_event_source(sources.SqsEventSource(queue))
+        queue = aws_sqs.Queue(queued_function, 'Queue', visibility_timeout=to_duration(timeout), **queue_config)
+        func = self.function(handler, 'Function', scope_override=queued_function, max_concurrency=max_concurrency, timeout=timeout)
+        func.add_event_source(sources.SqsEventSource(queue, batch_size=batch_size))
         queued_function.queue = queue
         queued_function.function = func
         return queued_function
