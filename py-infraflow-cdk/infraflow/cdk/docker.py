@@ -22,8 +22,10 @@ class EcsCluster:
                 command=None,
                 count=1,
                 cpu=256,
-                memory_limit_mib=512
+                memory_limit_mib=512,
+                environment=dict[str, str]
                 ):
+        environment = {**self.scope.env.environment_vars, **environment}
         if path:
             image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=path)
             image = ecs.ContainerImage.from_docker_image_asset(image_asset)
@@ -40,6 +42,7 @@ class EcsCluster:
                 image=ecs.ContainerImage.from_registry(ecr_image) if ecr_image else image if path else None,
                 container_name=f"{name}_task",
                 container_port=80,
+                environment=environment,
                 command=command
             ),
             security_groups=[
