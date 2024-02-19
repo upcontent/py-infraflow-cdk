@@ -1,3 +1,5 @@
+import copy
+
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_ecr_assets as assets
@@ -6,6 +8,22 @@ from aws_cdk.aws_ecs import Cluster
 
 from infraflow.cdk import ServiceStageStack
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
+
+
+class ContainerSize:
+    def __init__(self, cpu: int = 256, memory_limit_mib: int = 512):
+        self.memory_limit_mib = memory_limit_mib
+        self.cpu = cpu
+
+
+class ContainerImage:
+    def __init__(
+            self,
+            path=None,
+            ecr_image=None,
+    ):
+        self.ecr_image = ecr_image
+        self.path = path
 
 
 class EcsCluster:
@@ -17,29 +35,27 @@ class EcsCluster:
 
     def service(self,
                 name,
-                ecr_image: str = None,
-                path: str = None,
-                command=None,
+                image: ContainerImage,
+                command: str = None,
                 count=1,
-                cpu=256,
-                memory_limit_mib=512,
-                environment=dict[str, str]
+                size: ContainerSize = ContainerSize(),
+                environment: dict[str, str] = {}
                 ):
         environment = {**self.scope.env.environment_vars, **environment}
-        if path:
-            image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=path)
-            image = ecs.ContainerImage.from_docker_image_asset(image_asset)
+        if image.path:
+            image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=image.path)
+            local_image = ecs.ContainerImage.from_docker_image_asset(image_asset)
         else:
-            image = None
+            local_image = None
 
         return ecs_patterns.ApplicationLoadBalancedFargateService(
             self.scope, f"{name}_service",
             cluster=self.cluster,  # Required
-            cpu=cpu,  # Default is 256
+            cpu=size.cpu,  # Default is 256
             desired_count=count,  # Default is 1
             listener_port=80,
             task_image_options=ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
-                image=ecs.ContainerImage.from_registry(ecr_image) if ecr_image else image if path else None,
+                image=ecs.ContainerImage.from_registry(image.ecr_image) if image.ecr_image else local_image if image.path else None,
                 container_name=f"{name}_task",
                 container_port=80,
                 environment=environment,
@@ -54,7 +70,19 @@ class EcsCluster:
                 ))
             ],
             task_subnets=SubnetSelection(subnets=self.scope.env.vpc_subnets()),
-            memory_limit_mib=memory_limit_mib,  # Default is 512
+            memory_limit_mib=size.memory_limit_mib,  # Default is 512
             public_load_balancer=True
         )  # Default is True
 
+
+def add_queue_environment_variables(
+        environment: dict[str, str],
+        queue,
+        retry=None,
+        dlq=None
+) -> dict[str, str]:
+    environment = copy.copy(environment)
+    environment['SQS_QUEUE'] = retry
+    environment['SQS_RETRY_QUEUE'] = retry
+    environment['SQS_DEAD_LETTER_QUEUE'] = dlq
+    return environment

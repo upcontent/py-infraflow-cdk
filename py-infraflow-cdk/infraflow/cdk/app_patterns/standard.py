@@ -9,9 +9,11 @@ from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy
 from aws_cdk.aws_stepfunctions import IStateMachine
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
+from infraflow.cdk.app_patterns.express_default_dlq_processor import ProcessorConfig, DualPriorityResilientProcessor, \
+    PROCESSOR_TYPE
 from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
-from infraflow.cdk.events import EventBridgeEvents, InfraflowEventBus, SnsEvents
+from infraflow.cdk.events import EventBridgeEvents, InfraflowEventBus, SnsEvents, Event
 from infraflow.cdk.iam import PolicyBuilder, IamAction
 from infraflow.cdk.lambdas import LambdaContext
 from infraflow.cdk.sg.patterns import Tiered
@@ -113,6 +115,20 @@ class StandardServiceStage(ServiceStageStack):
     def ecs_cluster(self) -> EcsCluster:
         self.use_ecs()
         return self._ecs_cluster
+
+    def handle_event(self, event: Event, default: ProcessorConfig, express: ProcessorConfig = None):
+        uses_docker = express.type == PROCESSOR_TYPE.ECS_DOCKER or default.type == PROCESSOR_TYPE.ECS_DOCKER
+        uses_lambda = express.type == PROCESSOR_TYPE.LAMBDA_PYTHON or default.type == PROCESSOR_TYPE.LAMBDA_PYTHON
+        processor = DualPriorityResilientProcessor(
+            default_processor=default,
+            express_processor=express,
+            ecs_cluster=self.ecs_cluster if uses_docker else None,
+            lambda_context=self.lambda_context if uses_lambda else None,
+            event=event,
+            construct_id=event.id+"Processor",
+            scope=self
+        )
+        processor.create_resources()
 
     def use_ecs(self):
         self._ecs_cluster = self._ecs_cluster or EcsCluster(self, "EcsCluster")

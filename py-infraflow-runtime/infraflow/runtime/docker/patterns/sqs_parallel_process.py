@@ -13,26 +13,28 @@ from infraflow.runtime.docker.contracts.sqs import SqsBotoMessageRecord, SqsBoto
 
 from infraflow.runtime.common.logging import get_logger
 
-ENV_MAX_MESSAGES = os.environ.get("MAX_WORKERS") or 50
-ENV_MAX_RETRIES = os.environ.get("MAX_RETRIES") or 0
+ENV_MAX_MESSAGES = int(os.environ.get("BATCH_SIZE") or 50)
+ENV_MAX_RETRIES = int(os.environ.get("MAX_RETRIES") or 0)
 ENV_QUEUE_NAME = os.environ.get("SQS_QUEUE") or None
 ENV_RETRY_QUEUE_NAME = os.environ.get("SQS_RETRY_QUEUE") or None
 ENV_DLQ_QUEUE_NAME = os.environ.get("SQS_DLQ_QUEUE") or None
 
 logger = structlog.stdlib.BoundLogger()
 
+
 def minutes_retry_scheme(retries: int = 1) -> timedelta:
     return timedelta(minutes=pow(2, retries - 1))
+
 
 def async_message_processor(
         queue_name=ENV_QUEUE_NAME,
         max_messages=ENV_MAX_MESSAGES,
         retry_queue_name=ENV_QUEUE_NAME,
         max_retries=ENV_MAX_RETRIES,
-        dead_letter_queue=None
+        dead_letter_queue=ENV_DLQ_QUEUE_NAME
 ):
     def decorator(func: Callable):
-        func.process_messages = process_messages(
+        func.process_messages = lambda: process_messages(
             processor=func,
             queue_name=queue_name,
             max_messages=max_messages,
