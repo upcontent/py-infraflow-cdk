@@ -5,7 +5,7 @@ import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
 import aws_cdk.aws_events as aws_events
 from aws_cdk.aws_ec2 import InterfaceVpcEndpointAwsService
-from aws_cdk.aws_iam import IRole, Role, ServicePrincipal
+from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy
 from aws_cdk.aws_stepfunctions import IStateMachine
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
@@ -35,6 +35,7 @@ class StandardServiceStage(ServiceStageStack):
         self.vpc_endpoint_services = vpc_endpoint_services
         self._app_role = None
         self._event_publish_policy = None
+        self._eni_mgmnt_policy = None
         self.python_version = python_version
         self.src_path = src_path
         self._lambda_context: Optional[LambdaContext] = None
@@ -93,6 +94,14 @@ class StandardServiceStage(ServiceStageStack):
         return self._lambda_context
 
     def use_lambda(self):
+        ## allow lambda access to build EC2 network interface
+        self._eni_mgmnt_policy = self._eni_mgmnt_policy or ManagedPolicy.from_managed_policy_arn(
+            scope=self,
+            id="LambdaAllowENIManagement",
+            managed_policy_arn="arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+        )
+        self.app_role.add_managed_policy(self._eni_mgmnt_policy)
+
         self._lambda_context = self._lambda_context or LambdaContext(
             self,
             path=self.src_path,

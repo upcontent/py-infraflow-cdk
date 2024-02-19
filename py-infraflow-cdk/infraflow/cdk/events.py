@@ -97,7 +97,7 @@ class Event:
         return self
 
     def with_true_prop(self, key: str):
-        self.add_filter(Rule(key, generic={"equals-ignore-case": "true"}))
+        self.add_filter(Rule(key, generic={"equals-ignore-case": ["true"]}))
         return self
 
     def with_prop_equal(self, key: str, value: Any):
@@ -172,7 +172,7 @@ class EventBridgeEvent(Event):
         rules = {r.property: r.event_bridge_rule() for r in self.filters}
         return events.Rule(self.stage, self.id, event_bus=self.bus, targets=targets_, event_pattern=events.EventPattern(
             detail={
-                "event": self.events(self.event_key),  # [sqs.Queue],  # self.event_key,
+                "event": [self.event_key],  # [sqs.Queue],  # self.event_key,
                 **rules
             }
         ))
