@@ -3,7 +3,7 @@ import copy
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_ecr_assets as assets
-from aws_cdk.aws_ec2 import SubnetSelection
+from aws_cdk.aws_ec2 import SubnetSelection, SubnetType
 from aws_cdk.aws_ecs import Cluster
 
 from infraflow.cdk import ServiceStageStack
@@ -27,7 +27,8 @@ class ContainerImage:
 
 
 class EcsCluster:
-    def __init__(self, scope: ServiceStageStack, cluster_name: str):
+    def __init__(self, scope: ServiceStageStack, cluster_name: str, subnet_type: SubnetType = SubnetType.PRIVATE_WITH_EGRESS):
+        self.subnet_type = subnet_type
         self.scope = scope
         vpc = self.scope.env.vpc
 
@@ -69,7 +70,7 @@ class EcsCluster:
                     infraflow_pattern=self,
                 ))
             ],
-            task_subnets=SubnetSelection(subnets=self.scope.env.vpc_subnets()),
+            task_subnets=SubnetSelection(subnets=self.scope.env.service_subnets(self.subnet_type)),
             memory_limit_mib=size.memory_limit_mib,  # Default is 512
             public_load_balancer=True
         )  # Default is True

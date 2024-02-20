@@ -30,6 +30,9 @@ class LambdaContext:
                  subnet_type: SubnetType = SubnetType.PRIVATE_WITH_EGRESS,
                  tracing=aws_lambda.Tracing.ACTIVE
                  ):
+        self.vpc = vpc
+        self.tracing = tracing
+        self.subnet_type = subnet_type
         self.role = role
         self.runtime = runtime
         self.path = path
@@ -70,7 +73,7 @@ class LambdaContext:
                     ))
                 ],
                 environment={**self.stage.env.environment_vars},
-                vpc_subnets=SubnetSelection(subnets=self.stage.env.vpc_subnets()),
+                vpc_subnets=SubnetSelection(subnets=self.stage.env.service_subnets(self.subnet_type)),
                 vpc=self.stage.env.vpc,
                 tracing=aws_lambda.Tracing.ACTIVE,
                 role=self.role

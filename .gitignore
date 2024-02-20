@@ -3,3 +3,7 @@ venv
 .idea
 dist
 __pycache__
+eggs/
+.eggs/
+*.egg-info/
+*.egg
