@@ -70,15 +70,18 @@ class Env(IEnv):
         return self._vpc
 
     def vpc_subnets(self, subnet_type: SubnetType=None) -> list[ISubnet]:
-        return self.vpc.select_subnets(subnet_type=subnet_type).subnets
+        return self.vpc.select_subnets(subnet_type=subnet_type, one_per_az=True).subnets
 
     def service_subnets(self, subnet_type: SubnetType):
+
         vpc_subnets = self.vpc_subnets(subnet_type)
         if not self.config.subnet_map:
+            print("**** environment.py. no config.subnet_map, so vpc_subnets:", vpc_subnets)
             return vpc_subnets
-
         subnet_ids = self.config.subnet_map[subnet_type]
-        return [sn for sn in vpc_subnets for sni in subnet_ids if sni == sn.subnet_id]
+        proper_subnets = [sn for sn in vpc_subnets for sni in subnet_ids if sni == sn.subnet_id]
+        print("**** environment.py. [found] proper_subnets:", proper_subnets)
+        return proper_subnets
 
     def secret(self, key):
         return self.secrets_manager.get_secret_value(key)

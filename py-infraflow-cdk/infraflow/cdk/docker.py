@@ -3,8 +3,8 @@ import copy
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_ecr_assets as assets
-from aws_cdk.aws_ec2 import SubnetSelection, SubnetType
-from aws_cdk.aws_ecs import Cluster
+from aws_cdk.aws_ec2 import SubnetSelection, SubnetType, Subnet
+from aws_cdk.aws_ecs import Cluster, FargatePlatformVersion
 
 from infraflow.cdk import ServiceStageStack
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
@@ -60,7 +60,8 @@ class EcsCluster:
                 container_name=f"{name}_task",
                 container_port=80,
                 environment=environment,
-                command=command
+                command=command,
+                ## taskRole= IMPLEMENT!
             ),
             security_groups=[
                 self.scope.security_groups.get_group(target=SecurityGroupTarget(
@@ -72,8 +73,9 @@ class EcsCluster:
             ],
             task_subnets=SubnetSelection(subnets=self.scope.env.service_subnets(self.subnet_type)),
             memory_limit_mib=size.memory_limit_mib,  # Default is 512
-            public_load_balancer=True
+            public_load_balancer=True,
         )  # Default is True
+
 
 
 def add_queue_environment_variables(

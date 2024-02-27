@@ -4,7 +4,7 @@ from typing import Union
 from aws_cdk import aws_lambda, Duration
 from aws_cdk import aws_sqs
 from aws_cdk import aws_lambda_event_sources as sources
-from aws_cdk.aws_ec2 import SubnetType, SubnetSelection
+from aws_cdk.aws_ec2 import SubnetType, SubnetSelection, Subnet
 from aws_cdk.aws_events import Rule, Schedule
 from aws_cdk.aws_events_targets import LambdaFunction
 from aws_cdk.aws_iam import IRole
