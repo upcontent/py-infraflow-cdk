@@ -7,9 +7,11 @@ from aws_cdk import Duration
 from aws_cdk.aws_sqs import Queue
 from constructs import Construct
 
-from infraflow.cdk.docker import EcsCluster, add_queue_environment_variables, ContainerSize, ContainerImage
+from infraflow.cdk.docker import EcsCluster, add_queue_environment_variables, ContainerSize, ContainerImage, \
+    ContainerInstanceInfo
 from infraflow.cdk.events import Event
 from infraflow.cdk.lambdas import LambdaContext
+from infraflow.cdk.queue import QueueSubscription
 
 
 class PROCESSOR_TYPE(Enum):
@@ -30,10 +32,10 @@ class ProcessorConfig:
 
 
 class LambdaPythonProcessorConfig(ProcessorConfig):
-    def __init__(self, handler: str, timeout: Union[Duration, datetime.timedelta, int], max_concurrency: int = None, batch_size=1) -> None:
+    def __init__(self, handler: str, max_concurrency: int = None, subscription: QueueSubscription = QueueSubscription()) -> None:
         super().__init__(PROCESSOR_TYPE.LAMBDA_PYTHON)
-        self.batch_size = batch_size
-        self.timeout = timeout
+        self.batch_size = subscription.max_receive_count
+        self.timeout = subscription.timeout
         self.handler = handler
         self.max_concurrency = max_concurrency
 
@@ -41,13 +43,9 @@ class LambdaPythonProcessorConfig(ProcessorConfig):
 class EcsDockerProcessorConfig(ProcessorConfig):
     def __init__(
             self,
-            image: ContainerImage,
-            command: str,
-            count: int = 1,
-            size: ContainerSize = ContainerSize(),
-            batch_size: int = 50,
+            container: ContainerInstanceInfo,
+            subscription: QueueSubscription,
             max_retries: int = 0,
-            environment: dict[str, str] = {}
     ):
         """
         Initializes an instance of the class.
@@ -64,17 +62,17 @@ class EcsDockerProcessorConfig(ProcessorConfig):
 
         """
         super().__init__(PROCESSOR_TYPE.ECS_DOCKER)
-        self.size = size
-        self.image = image
-        self.memory_limit_mib = size.memory_limit_mib
-        self.cpu = size.cpu
-        self.count = count
-        self.max_coroutines = batch_size
+        self.size = container.size
+        self.image = container.image
+        self.memory_limit_mib = container.size.memory_limit_mib
+        self.cpu = container.size.cpu
+        self.count = container.count
+        self.max_coroutines = subscription.max_receive_count
         self.max_retries = max_retries
-        self.environment = copy.copy(environment)
-        self.environment['BATCH_SIZE'] = str(batch_size)
+        self.environment = copy.copy(container.environment)
+        self.environment['BATCH_SIZE'] = str(subscription.max_receive_count)
         self.environment['MAX_RETRIES'] = str(max_retries)
-        self.command = command
+        self.command = container.command
 
 
 class DualPriorityResilientProcessor(Construct):
@@ -144,18 +142,15 @@ class DualPriorityResilientProcessor(Construct):
         )
 
     def create_ecs_processor(self, processor_config: EcsDockerProcessorConfig, suffix, retry_url, dlq_url):
-        queue = Queue(self, suffix+'Queue', dead_letter_queue=dlq_url)
-        add_queue_environment_variables(
-            processor_config.environment,
-            queue=queue.queue_url,
-            retry=retry_url or (queue.queue_url if processor_config.retry_self else None),
-            dlq=dlq_url
-        )
-        return queue, self.ecs_cluster.service(
+        queue, service = self.ecs_cluster.queued_service_with_queue(
             name=self.name+suffix,
-            environment={**self.ecs_cluster.scope.env.environment_vars, **processor_config.environment},
-            count=processor_config,
-            size=processor_config.size,
-            image=processor_config.image,
-            command=processor_config.command
+            dead_letter_queue=dlq_url,
+            container=ContainerInstanceInfo(
+                environment={**self.ecs_cluster.scope.env.environment_vars, **processor_config.environment},
+                count=processor_config.count,
+                size=processor_config.size,
+                image=processor_config.image,
+                command=processor_config.command
+            )
         )
+        return queue, service

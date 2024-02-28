@@ -35,9 +35,9 @@ class StandardServiceStage(ServiceStageStack):
         super().__init__(app, service_name, stage_name, env, **kwargs)
         self.db_ports = db_ports
         self.vpc_endpoint_services = vpc_endpoint_services
+        self._ecs_execution_role = None
         self._app_role = None
         self._event_publish_policy = None
-        self._eni_mgmnt_policy = None
         self.python_version = python_version
         self.src_path = src_path
         self._lambda_context: Optional[LambdaContext] = None
@@ -47,6 +47,7 @@ class StandardServiceStage(ServiceStageStack):
         self._ecs_cluster: Optional[EcsCluster] = None
         self._sns_bus_cdk: Optional[aws_sns.Topic] = None
         self.security_groups: Tiered = Tiered(self, db_ports=db_ports)
+        self._managed_policies = {}
 
     @property
     def api(self) -> apigateway.IRestApi:
@@ -97,12 +98,9 @@ class StandardServiceStage(ServiceStageStack):
 
     def use_lambda(self):
         ## allow lambda access to build EC2 network interface
-        self._eni_mgmnt_policy = self._eni_mgmnt_policy or ManagedPolicy.from_managed_policy_arn(
-            scope=self,
-            id="LambdaAllowENIManagement",
-            managed_policy_arn="arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+        self.app_role.add_managed_policy(
+            self.managed_policy("LambdaAllowENIManagement", name="AWSLambdaENIManagementAccess")
         )
-        self.app_role.add_managed_policy(self._eni_mgmnt_policy)
 
         self._lambda_context = self._lambda_context or LambdaContext(
             self,
@@ -110,6 +108,16 @@ class StandardServiceStage(ServiceStageStack):
             role=self.app_role,
             runtime=self.python_version
         )
+
+    def managed_policy(self, id, *, arn=None, name=None):
+        if not arn:
+            arn = f"arn:aws:iam::aws:policy/service-role/{name}"
+        self._managed_policies[id] = self._managed_policies.get(id) or ManagedPolicy.from_managed_policy_arn(
+            scope=self,
+            id=id,
+            managed_policy_arn=arn
+        )
+        return self._managed_policies[id]
 
     @property
     def ecs_cluster(self) -> EcsCluster:
@@ -131,7 +139,18 @@ class StandardServiceStage(ServiceStageStack):
         processor.create_resources()
 
     def use_ecs(self):
-        self._ecs_cluster = self._ecs_cluster or EcsCluster(self, "EcsCluster")
+        if not self._ecs_execution_role:
+            self._ecs_execution_role = Role(self, "EcsExecRole", assumed_by=ServicePrincipal("ecs.amazonaws.com"))
+            self._ecs_execution_role.add_managed_policy(
+                self.managed_policy("EcsTaskExecutionPolicy", name="AmazonECSTaskExecutionRolePolicy")
+            )
+
+        self._ecs_cluster = self._ecs_cluster or EcsCluster(
+            self,
+            "EcsCluster",
+            execution_role=self._ecs_execution_role,
+            task_role=self.app_role
+        )
 
     def use_monolith_lambda_api(self, handler):
         self._api = apigateway.LambdaRestApi(
@@ -177,6 +196,7 @@ class StandardServiceStage(ServiceStageStack):
     @property
     def app_role(self) -> IRole:
         self._app_role = self._app_role or Role(self, 'Role', assumed_by=ServicePrincipal("lambda.amazonaws.com"))
+        self._app_role.grant_assume_role(ServicePrincipal("ecs.amazonaws.com"))
         if self._event_bridge_bus_cdk:
             self._event_bridge_bus_cdk.grant_put_events_to(self._app_role)
         return self._app_role
