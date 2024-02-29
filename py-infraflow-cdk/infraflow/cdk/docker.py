@@ -107,20 +107,19 @@ class EcsCluster:
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
         return ecs_patterns.ApplicationLoadBalancedFargateService(
-            self.scope, f"{name}_service",
+            self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
             cpu=container.size.cpu,  # Default is 256
             desired_count=container.count,  # Default is 1
             listener_port=80,
             task_image_options=ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
                 image=self.get_image(image=container.image, name=name),
-                container_name=f"{name}_task",
+                container_name=f"{name}Task",
                 container_port=80,
                 environment=environment,
                 command=container.command,
                 task_role=self.task_role,
                 execution_role=self.execution_role,
-                ## taskRole= IMPLEMENT!
             ),
             propagate_tags=PropagatedTagSource.SERVICE,
             security_groups=[self.get_security_group(name)],
@@ -134,18 +133,18 @@ class EcsCluster:
             self,
             name,
             container: ContainerInstanceInfo,
-            queue_subscription: QueueSubscription = QueueSubscription(),
             scaling: AutoScaling = AutoScaling(),
             dead_letter_queue: sqs.Queue = None,
+            visibility_timeout: Union[Duration, timedelta, int] = 30,
             **queue_config
     ):
-        queue = sqs.Queue(self.scope, name+'Queue', visibility_timeout=to_duration(queue_subscription.timeout), dead_letter_queue=dead_letter_queue, **queue_config)
+        queue = sqs.Queue(self.scope, name+'Queue', visibility_timeout=to_duration(visibility_timeout), dead_letter_queue=dead_letter_queue, **queue_config)
         return queue, self.queued_service(
             name,
             container,
             queue,
-            queue_subscription,
-            scaling
+            scaling,
+            dead_letter_queue=dead_letter_queue
         )
 
     def queued_service(
@@ -153,34 +152,40 @@ class EcsCluster:
             name,
             container: ContainerInstanceInfo,
             queue: sqs.Queue,
-            queue_subscription: QueueSubscription = QueueSubscription(),
-            scaling: AutoScaling = AutoScaling()
+            scaling: AutoScaling = AutoScaling(),
+            dead_letter_queue: sqs.Queue = None
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        return ecs_patterns.QueueProcessingFargateService(
-            self.scope, f"{name}_service",
-            cluster=self.cluster,  # Required
-            cpu=container.size.cpu,  # Default is 256
-            min_scaling_capacity=container.count,
-            max_scaling_capacity=container.max_count,
-            max_receive_count=queue_subscription.max_receive_count,
-            visibility_timeout=queue_subscription.timeout,
-            scaling_steps=scaling.scaling_steps,
-            image=self.get_image(image=container.image, name=name),
-            environment=environment,
-            command=container.command,
-            queue=queue,
-            task_definition=ecs.FargateTaskDefinition(
+        task = ecs.FargateTaskDefinition(
+                scope=self.scope,
+                id=f"{name}TaskDefinition",
                 cpu=container.size.cpu,  # Default is 256
                 memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
                 task_role=self.task_role,
                 execution_role=self.execution_role,
-            ),
+            )
+        task.add_container(id=f"{name}TaskContainer", image=self.get_image(image=container.image, name=name))
+
+        environment = add_queue_environment_variables(
+            environment=environment,
+            queue=queue.queue_url,
+            retry=queue.queue_url,
+            dlq=dead_letter_queue
+        )
+        return ecs_patterns.QueueProcessingFargateService(
+            self.scope, f"{name}Service",
+            cluster=self.cluster,  # Required
+            min_scaling_capacity=container.count,
+            max_scaling_capacity=container.max_count,
+            scaling_steps=scaling.scaling_steps,
+            environment=environment,
+            command=container.command,
+            queue=queue,
+            task_definition=task,
             propagate_tags=PropagatedTagSource.SERVICE,
             security_groups=[self.get_security_group(name)],
             task_subnets=self.subnets(),
             assign_public_ip=False,
-            memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
         )  # Default is True
 
     def scheduled_service(
@@ -191,13 +196,13 @@ class EcsCluster:
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
         return ecs_patterns.ScheduledFargateTask(
-            self.scope, f"{name}_service",
+            self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
             cpu=container.size.cpu,  # Default is 256
             desired_task_count=container.count,
             scheduled_fargate_task_image_options=ecs_patterns.ScheduledFargateTaskImageOptions(
                 image=self.get_image(image=container.image, name=name),
-                container_name=f"{name}_task",
+                container_name=f"{name}Task",
                 container_port=80,
                 environment=environment,
                 task_role=self.task_role,
@@ -211,7 +216,6 @@ class EcsCluster:
         )  # Default is True
 
 
-
 def add_queue_environment_variables(
         environment: dict[str, str],
         queue,
@@ -219,7 +223,10 @@ def add_queue_environment_variables(
         dlq=None
 ) -> dict[str, str]:
     environment = copy.copy(environment)
-    environment['SQS_QUEUE'] = retry
-    environment['SQS_RETRY_QUEUE'] = retry
-    environment['SQS_DEAD_LETTER_QUEUE'] = dlq
+    if queue:
+        environment['SQS_QUEUE'] = queue
+    if retry:
+        environment['SQS_RETRY_QUEUE'] = retry
+    if dlq:
+        environment['SQS_DEAD_LETTER_QUEUE'] = dlq
     return environment

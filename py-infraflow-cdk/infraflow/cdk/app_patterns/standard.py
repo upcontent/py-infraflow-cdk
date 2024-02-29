@@ -5,7 +5,7 @@ import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
 import aws_cdk.aws_events as aws_events
 from aws_cdk.aws_ec2 import InterfaceVpcEndpointAwsService
-from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy
+from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy, PolicyStatement, Effect
 from aws_cdk.aws_stepfunctions import IStateMachine
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
@@ -196,7 +196,13 @@ class StandardServiceStage(ServiceStageStack):
     @property
     def app_role(self) -> IRole:
         self._app_role = self._app_role or Role(self, 'Role', assumed_by=ServicePrincipal("lambda.amazonaws.com"))
-        self._app_role.grant_assume_role(ServicePrincipal("ecs.amazonaws.com"))
+        self._app_role.assume_role_policy.add_statements(
+            PolicyStatement(
+                effect=Effect.ALLOW,
+                actions=['sts:AssumeRole'],
+                principals=[ServicePrincipal("ecs.amazonaws.com")]
+            )
+        )
         if self._event_bridge_bus_cdk:
             self._event_bridge_bus_cdk.grant_put_events_to(self._app_role)
         return self._app_role

@@ -34,7 +34,7 @@ class ProcessorConfig:
 class LambdaPythonProcessorConfig(ProcessorConfig):
     def __init__(self, handler: str, max_concurrency: int = None, subscription: QueueSubscription = QueueSubscription()) -> None:
         super().__init__(PROCESSOR_TYPE.LAMBDA_PYTHON)
-        self.batch_size = subscription.max_receive_count
+        self.batch_size = subscription.batch_size
         self.timeout = subscription.timeout
         self.handler = handler
         self.max_concurrency = max_concurrency
@@ -44,7 +44,7 @@ class EcsDockerProcessorConfig(ProcessorConfig):
     def __init__(
             self,
             container: ContainerInstanceInfo,
-            subscription: QueueSubscription,
+            subscription: QueueSubscription = QueueSubscription(),
             max_retries: int = 0,
     ):
         """
@@ -67,10 +67,10 @@ class EcsDockerProcessorConfig(ProcessorConfig):
         self.memory_limit_mib = container.size.memory_limit_mib
         self.cpu = container.size.cpu
         self.count = container.count
-        self.max_coroutines = subscription.max_receive_count
+        self.max_coroutines = subscription.batch_size
         self.max_retries = max_retries
         self.environment = copy.copy(container.environment)
-        self.environment['BATCH_SIZE'] = str(subscription.max_receive_count)
+        self.environment['BATCH_SIZE'] = str(subscription.batch_size)
         self.environment['MAX_RETRIES'] = str(max_retries)
         self.command = container.command
 
