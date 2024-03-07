@@ -144,6 +144,23 @@ class StandardServiceStage(ServiceStageStack):
             self._ecs_execution_role.add_managed_policy(
                 self.managed_policy("EcsTaskExecutionPolicy", name="AmazonECSTaskExecutionRolePolicy")
             )
+            self._ecs_execution_role.add_to_policy(
+                PolicyStatement(
+                    effect=Effect.ALLOW,
+                    resources=['*'],
+                    actions=['ecr:GetAuthorizationToken',
+                             'ecr:BatchCheckLayerAvailability',
+                             'ecr:GetDownloadUrlForLayer',
+                             'ecr:BatchGetImage']
+                )
+            ) ## 03.01 -> allow ecs execution to access ALL ecr resources..
+            self._ecs_execution_role.assume_role_policy.add_statements(
+                PolicyStatement(
+                    effect=Effect.ALLOW,
+                    actions=['sts:AssumeRole'],
+                    principals=[ServicePrincipal("ecs-tasks.amazonaws.com")]
+                )
+            )
 
         self._ecs_cluster = self._ecs_cluster or EcsCluster(
             self,
@@ -201,6 +218,13 @@ class StandardServiceStage(ServiceStageStack):
                 effect=Effect.ALLOW,
                 actions=['sts:AssumeRole'],
                 principals=[ServicePrincipal("ecs.amazonaws.com")]
+            )
+        )
+        self._app_role.assume_role_policy.add_statements(
+            PolicyStatement(
+                effect=Effect.ALLOW,
+                actions=['sts:AssumeRole'],
+                principals=[ServicePrincipal("ecs-tasks.amazonaws.com")]
             )
         )
         if self._event_bridge_bus_cdk:

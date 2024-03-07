@@ -106,7 +106,7 @@ class EcsCluster:
             container: ContainerInstanceInfo
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        return ecs_patterns.ApplicationLoadBalancedFargateService(
+        alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
             cpu=container.size.cpu,  # Default is 256
@@ -128,6 +128,10 @@ class EcsCluster:
             public_load_balancer=False,
             memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
         )  # Default is True
+        # subnet workaround, since assigning above didnt work [https://github.com/aws/aws-cdk/issues/5892]
+        cfn_lb = alb_fargate_service.load_balancer.node.default_child
+        cfn_lb.subnets = [subnet.subnet_id for subnet in self.scope.env.service_subnets(self.subnet_type)]
+        return alb_fargate_service
 
     def queued_service_with_queue(
             self,
