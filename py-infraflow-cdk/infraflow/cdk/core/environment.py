@@ -120,7 +120,11 @@ class Env(IEnv):
 
     def interface_endpoints(self, service_names: Optional[list[str]] = None) -> list[InterfaceVpcEndpoint]:
         print(f"**** INTERFACE: {VpcEndpointType.INTERFACE}, service_names={service_names}")
-        for ep in self._get_endpoints(endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names):
+        endpoints = self._get_endpoints(
+            endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names
+        ).get("VpcEndpoints")
+
+        for ep in endpoints:
             print(f"**** endpoint: {ep}")
             if ep.get("VpcEndpointType") == "Interface":
                 return InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
