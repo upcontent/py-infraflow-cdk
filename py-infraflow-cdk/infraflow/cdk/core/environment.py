@@ -89,54 +89,34 @@ class Env(IEnv):
     def param(self, key):
         return self.ssm.get_parameter(key)
 
-    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[InterfaceVpcEndpoint]:
+    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> dict[str, InterfaceVpcEndpoint]:
         print(f"*** service names: {[s.name for s in services]}, and shortnames: {[s.short_name for s in services]}")
         return self.interface_endpoints(service_names=[s.short_name for s in services])
 
     def _get_endpoints(
             self,
-            endpoint_type: VpcEndpointType, *,
+            endpoint_type: Optional[VpcEndpointType], *,
             service_names: Optional[list[str]] = None,
     ) -> list[dict]:
         client = boto3.client('ec2')
-        print(f"*** get_endpoints call - vpc_id: {self.vpc.vpc_id}, vpc-endpoint-type: "
-              f"{[str(endpoint_type).lower().capitalize()]}, service-name: {service_names}")
         results = client.describe_vpc_endpoints(Filters=only_truthy_items([
             {
                 "Name": "vpc-id",
                 "Values": [self.vpc.vpc_id],
-            },
-            {
-                "Name": "vpc-endpoint-type",
-                "Values": [str(endpoint_type).lower().capitalize()],
-            },
-            {
-                "Name": "service-name",
-                "Values": service_names
-            } if service_names else None
-        ]))
-        print(f"*** results: {results}")
+            }
+            ]))
         return results
 
-    def interface_endpoints(self, service_names: Optional[list[str]] = None) -> list[InterfaceVpcEndpoint]:
-        print(f"**** INTERFACE: {VpcEndpointType.INTERFACE}, service_names={service_names}")
-        endpoints = self._get_endpoints(
-            endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names
-        ).get("VpcEndpoints")
-
-        for ep in endpoints:
-            print(f"**** endpoint: {ep}")
+    def interface_endpoints(self, service_names: Optional[list[str]] = None) -> dict[str, InterfaceVpcEndpoint]:
+        endpoint_types = {}
+        for ep in self._get_endpoints(endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names
+                                      ).get("VpcEndpoints"):
             if ep.get("VpcEndpointType") == "Interface":
-                return InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
-                        self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')
+                endpoint_types[ep.get("ServiceName")] = InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
+                        scope=self.scope, id=ep.get("VpcEndpointId"), port=443, vpc_endpoint_id=ep.get('VpcEndpointId')
                     )
-        # return [
-        #     InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
-        #         self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')
-        #     )
-        #     for ep in self._get_endpoints(endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names)
-        #     if ep.get("VpcEndpointType") == "Interface"
-        # ]
+        return endpoint_types
+
 
     def gateway_endpoints(self) -> list[GatewayVpcEndpoint]:
         return [
