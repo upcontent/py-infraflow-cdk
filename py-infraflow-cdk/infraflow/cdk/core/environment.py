@@ -4,7 +4,8 @@ from enum import Enum
 import boto3
 
 from aws_cdk.aws_ec2 import Vpc, CfnInternetGateway, NatProvider, NatInstanceProvider, Subnet, IVpc, ISubnet, \
-    SubnetType, InterfaceVpcEndpoint, InterfaceVpcEndpointAwsService, VpcEndpointType, VpcEndpoint, GatewayVpcEndpoint
+    SubnetType, InterfaceVpcEndpoint, InterfaceVpcEndpointAwsService, VpcEndpointType, VpcEndpoint, GatewayVpcEndpoint, \
+    IInterfaceVpcEndpoint, IGatewayVpcEndpoint
 from constructs import IConstruct, Construct
 
 from infraflow.priv_utils import only_truthy_items
@@ -14,6 +15,7 @@ DEFAULT_INTERFACE_SERVICES = [
     InterfaceVpcEndpointAwsService.SNS,
     InterfaceVpcEndpointAwsService.S3,
     InterfaceVpcEndpointAwsService.SES,
+    InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
     InterfaceVpcEndpointAwsService.RDS_DATA
 ]
 
@@ -89,7 +91,7 @@ class Env(IEnv):
     def param(self, key):
         return self.ssm.get_parameter(key)
 
-    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[InterfaceVpcEndpoint]:
+    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[IInterfaceVpcEndpoint]:
         return self.interface_endpoints(service_names=[s.name for s in services])
 
     def _get_endpoints(
@@ -114,7 +116,7 @@ class Env(IEnv):
         ]))
         return results
 
-    def interface_endpoints(self, service_names: Optional[list[str]] = None) -> list[InterfaceVpcEndpoint]:
+    def interface_endpoints(self, service_names: Optional[list[str]] = None) -> list[IInterfaceVpcEndpoint]:
         return [
             InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
                 self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')
@@ -123,7 +125,7 @@ class Env(IEnv):
             if ep.get("VpcEndpointType") == "Interface"
         ]
 
-    def gateway_endpoints(self) -> list[GatewayVpcEndpoint]:
+    def gateway_endpoints(self) -> list[IGatewayVpcEndpoint]:
         return [
             GatewayVpcEndpoint.from_gateway_vpc_endpoint_id(
                 self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')

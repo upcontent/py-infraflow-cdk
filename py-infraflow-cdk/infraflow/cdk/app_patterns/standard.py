@@ -48,6 +48,7 @@ class StandardServiceStage(ServiceStageStack):
         self._sns_bus_cdk: Optional[aws_sns.Topic] = None
         self.security_groups: Tiered = Tiered(self, db_ports=db_ports)
         self._managed_policies = {}
+        self._endpoints_setup = False
 
     @property
     def api(self) -> apigateway.IRestApi:
@@ -151,6 +152,15 @@ class StandardServiceStage(ServiceStageStack):
             execution_role=self._ecs_execution_role,
             task_role=self.app_role
         )
+        ecr_required_endpoints = [
+            InterfaceVpcEndpointAwsService.ECR,
+            InterfaceVpcEndpointAwsService.ECR_DOCKER,
+            InterfaceVpcEndpointAwsService.SECRETS_MANAGER
+        ]
+        for endpoint in ecr_required_endpoints:
+            if endpoint not in self.vpc_endpoint_services:
+                self.vpc_endpoint_services.append(endpoint)
+
 
     def use_monolith_lambda_api(self, handler):
         self._api = apigateway.LambdaRestApi(
@@ -208,6 +218,10 @@ class StandardServiceStage(ServiceStageStack):
         return self._app_role
 
     def setup_endpoint_access(self):
+        self._endpoints_setup = True
         interfaces = self.env.service_endpoints(self.vpc_endpoint_services)
         for x in interfaces:
             self.security_groups.app.connections.allow_to(x)
+
+    def do_final_setup(self):
+        self.setup_endpoint_access()
