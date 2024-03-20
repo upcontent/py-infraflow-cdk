@@ -14,8 +14,10 @@ from constructs import Construct, IConstruct
 from infraflow.cdk.core.service_stage import ServiceStageStack
 from infraflow.cdk.core.utils import to_duration
 from infraflow.cdk.iam import PolicyBuilder, action_groups
+from infraflow.cdk.instrumentation.queues import QueueInstrumentation
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
 from infraflow.util import caps_camel
+from infraflow.cdk.instrumentation.lambdas import LambdaInstrumentation
 
 registry = []
 
@@ -38,6 +40,10 @@ class LambdaContext:
         self.path = path
         self.stage = stage
         self.default_sg = stage.default_sg
+        self.queues: list[aws_sqs.Queue] = []
+        self.functions = list[aws_lambda.Function]
+        self.queue_instrumentation = dict[aws_sqs.Queue, QueueInstrumentation]
+        self.lambda_instrumentation = dict[aws_sqs.Queue, LambdaInstrumentation]
 
     # def to_cdk(self):
     #     return dict(
@@ -81,6 +87,7 @@ class LambdaContext:
         )
         # if self.role:
         #     func.grant_invoke(self.role)
+        self.lambda_instrumentation[func] = LambdaInstrumentation(func, reserved_concurrency=max_concurrency)
         return func
 
     def construct_name(self, handler: str, name: str, suffix: str):
@@ -101,6 +108,7 @@ class LambdaContext:
         constructed_name = self.construct_name(handler, name, suffix)
         queued_function = QueueFunctionConstruct(self.stage, constructed_name)
         queue = aws_sqs.Queue(queued_function, 'Queue', visibility_timeout=to_duration(timeout), **queue_config)
+        self.queue_instrumentation[queue] = QueueInstrumentation(queue)
         func = self.function(handler, 'Function', scope_override=queued_function, max_concurrency=max_concurrency, timeout=timeout)
         func.add_event_source(sources.SqsEventSource(queue, batch_size=batch_size))
         queued_function.queue = queue
@@ -128,6 +136,15 @@ class LambdaContext:
 class QueueFunctionConstruct(Construct):
     function: aws_lambda.Function
     queue: aws_sqs.Queue
+    reserved_concurrency: int
 
     def __init__(self, scope: Construct, id: str):
         super().__init__(scope, id)
+
+    @property
+    def function_instrumentation(self):
+        return LambdaInstrumentation(self.function, self.reserved_concurrency)
+
+    @property
+    def queue_instrumentation(self):
+        return QueueInstrumentation(self.queue)
