@@ -5,7 +5,7 @@ import boto3
 
 from aws_cdk.aws_ec2 import Vpc, CfnInternetGateway, NatProvider, NatInstanceProvider, Subnet, IVpc, ISubnet, \
     SubnetType, InterfaceVpcEndpoint, InterfaceVpcEndpointAwsService, VpcEndpointType, VpcEndpoint, GatewayVpcEndpoint, \
-    IInterfaceVpcEndpoint, IGatewayVpcEndpoint
+    IInterfaceVpcEndpoint
 from constructs import IConstruct, Construct
 
 from infraflow.priv_utils import only_truthy_items
@@ -40,7 +40,7 @@ class IEnv:
     def environment_vars(self) -> dict:
         raise NotImplemented()
 
-    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[InterfaceVpcEndpoint]:
+    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[IInterfaceVpcEndpoint]:
         raise NotImplemented()
 
 
@@ -66,6 +66,8 @@ class Env(IEnv):
         self.secrets_manager = boto3.client('secretsmanager')
         self.ssm = boto3.client('ssm')
         self._vpc = Vpc.from_lookup(self.scope, "VPC", vpc_id=self.config.vpc_id)
+        self._interface_endpoints = None
+        self._service_endpoints = {}
 
     @property
     def vpc(self) -> IVpc:
@@ -91,12 +93,9 @@ class Env(IEnv):
     def param(self, key):
         return self.ssm.get_parameter(key)
 
-    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[IInterfaceVpcEndpoint]:
-        return self.interface_endpoints(service_names=[s.name for s in services])
-
     def _get_endpoints(
             self,
-            endpoint_type: VpcEndpointType, *,
+            endpoint_type: Optional[VpcEndpointType], *,
             service_names: Optional[list[str]] = None,
     ) -> list[dict]:
         client = boto3.client('ec2')
@@ -104,28 +103,33 @@ class Env(IEnv):
             {
                 "Name": "vpc-id",
                 "Values": [self.vpc.vpc_id],
-            },
-            {
-                "Name": "vpc-endpoint-type",
-                "Values": [str(endpoint_type).lower().capitalize()],
-            },
-            {
-                "Name": "service-name",
-                "Values": service_names
-            } if service_names else None
-        ]))
+            }
+            ]))
         return results
 
-    def interface_endpoints(self, service_names: Optional[list[str]] = None) -> list[IInterfaceVpcEndpoint]:
-        return [
-            InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
-                self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')
-            )
-            for ep in self._get_endpoints(endpoint_type=VpcEndpointType.INTERFACE, service_names=service_names)
+    @property
+    def interface_endpoints(self) -> list[InterfaceVpcEndpoint]:
+        self._interface_endpoints = self._interface_endpoints or [
+            ep
+            for ep
+            in self._get_endpoints(endpoint_type=VpcEndpointType.INTERFACE).get("VpcEndpoints")
             if ep.get("VpcEndpointType") == "Interface"
         ]
+        return self._interface_endpoints
 
-    def gateway_endpoints(self) -> list[IGatewayVpcEndpoint]:
+    def service_endpoint(self, service: InterfaceVpcEndpointAwsService) -> IInterfaceVpcEndpoint:
+        for ep in self.interface_endpoints:
+            if service.short_name == ep.get("ServiceName"):
+                self._service_endpoints[service] = InterfaceVpcEndpoint.from_interface_vpc_endpoint_attributes(
+                    scope=self.scope, id=ep.get("VpcEndpointId"), port=443, vpc_endpoint_id=ep.get('VpcEndpointId')
+                )
+                return self._service_endpoints[service]
+
+    def service_endpoints(self, services: list[InterfaceVpcEndpointAwsService]) -> list[IInterfaceVpcEndpoint]:
+        return [self.service_endpoint(service) for service in services if self.service_endpoint(service)]
+
+    @property
+    def gateway_endpoints(self) -> list[GatewayVpcEndpoint]:
         return [
             GatewayVpcEndpoint.from_gateway_vpc_endpoint_id(
                 self.scope, '', vpc_endpoint_id=ep.get('VpcEndpointId')
