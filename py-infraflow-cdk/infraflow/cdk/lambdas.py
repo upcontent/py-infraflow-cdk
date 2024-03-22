@@ -41,9 +41,9 @@ class LambdaContext:
         self.stage = stage
         self.default_sg = stage.default_sg
         self.queues: list[aws_sqs.Queue] = []
-        self.functions = list[aws_lambda.Function]
-        self.queue_instrumentation = dict[aws_sqs.Queue, QueueInstrumentation]
-        self.lambda_instrumentation = dict[aws_sqs.Queue, LambdaInstrumentation]
+        self.functions: list[aws_lambda.Function] = []
+        self.queue_instrumentation: dict[aws_sqs.Queue, QueueInstrumentation] = {}
+        self.lambda_instrumentation: dict[aws_sqs.Queue, LambdaInstrumentation] = {}
 
     # def to_cdk(self):
     #     return dict(
