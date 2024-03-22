@@ -172,7 +172,8 @@ class StandardServiceStage(ServiceStageStack):
         ecr_required_endpoints = [
             InterfaceVpcEndpointAwsService.ECR,
             InterfaceVpcEndpointAwsService.ECR_DOCKER,
-            InterfaceVpcEndpointAwsService.SECRETS_MANAGER
+            InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+            InterfaceVpcEndpointAwsService.S3
         ]
         for endpoint in ecr_required_endpoints:
             if endpoint not in self.vpc_endpoint_services:
