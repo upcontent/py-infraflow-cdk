@@ -75,7 +75,7 @@ class EcsDockerProcessorConfig(ProcessorConfig):
         self.command = container.command
 
 
-class DualPriorityResilientProcessor(Construct):
+class DualPriorityResilientJob(Construct):
     def __init__(
             self,
             scope: Construct,

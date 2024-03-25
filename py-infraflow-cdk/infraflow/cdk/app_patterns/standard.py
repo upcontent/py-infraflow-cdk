@@ -9,7 +9,7 @@ from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy, Policy
 from aws_cdk.aws_stepfunctions import IStateMachine
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
-from infraflow.cdk.app_patterns.express_default_dlq_processor import ProcessorConfig, DualPriorityResilientProcessor, \
+from infraflow.cdk.app_patterns.express_default_dlq_processor import ProcessorConfig, DualPriorityResilientJob, \
     PROCESSOR_TYPE
 from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
@@ -128,7 +128,7 @@ class StandardServiceStage(ServiceStageStack):
     def handle_event(self, event: Event, default: ProcessorConfig, express: ProcessorConfig = None):
         uses_docker = express.type == PROCESSOR_TYPE.ECS_DOCKER or default.type == PROCESSOR_TYPE.ECS_DOCKER
         uses_lambda = express.type == PROCESSOR_TYPE.LAMBDA_PYTHON or default.type == PROCESSOR_TYPE.LAMBDA_PYTHON
-        processor = DualPriorityResilientProcessor(
+        processor = DualPriorityResilientJob(
             default_processor=default,
             express_processor=express,
             ecs_cluster=self.ecs_cluster if uses_docker else None,

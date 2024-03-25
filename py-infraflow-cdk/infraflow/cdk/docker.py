@@ -153,7 +153,7 @@ class EcsCluster:
             dead_letter_queue: sqs.Queue = None,
             visibility_timeout: Union[Duration, timedelta, int] = 30,
             **queue_config
-    ):
+    ) -> (sqs.Queue, ecs_patterns.QueueProcessingFargateService):
         queue = sqs.Queue(self.scope, name+'Queue', visibility_timeout=to_duration(visibility_timeout), dead_letter_queue=dead_letter_queue, **queue_config)
         return queue, self.queued_service(
             name,
@@ -170,7 +170,7 @@ class EcsCluster:
             queue: sqs.Queue,
             scaling: AutoScaling = AutoScaling(),
             dead_letter_queue: sqs.Queue = None
-    ):
+    ) -> ecs_patterns.QueueProcessingFargateService:
         environment = {**self.scope.env.environment_vars, **container.environment}
         task = ecs.FargateTaskDefinition(
                 scope=self.scope,
