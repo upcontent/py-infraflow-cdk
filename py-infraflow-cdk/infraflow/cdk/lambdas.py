@@ -43,7 +43,7 @@ class LambdaContext:
         self.queues: list[aws_sqs.Queue] = []
         self.functions = list[aws_lambda.Function]
         self.queue_instrumentation = dict[aws_sqs.Queue, QueueInstrumentation]
-        self.lambda_instrumentation = dict[aws_sqs.Queue, LambdaInstrumentation]
+        self.lambda_instrumentation = dict[aws_lambda.Function, LambdaInstrumentation]
 
     # def to_cdk(self):
     #     return dict(

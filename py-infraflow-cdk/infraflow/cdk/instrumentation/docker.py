@@ -4,31 +4,36 @@ from typing import Union
 from aws_cdk import Duration
 from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWidget
 from aws_cdk.aws_ecs import FargateService
+from aws_cdk.aws_logs import MetricFilter, FilterPattern, LogGroup
 
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
 class EcsServiceMetrics:
-    def __init__(self, ecs_service: FargateService):
+    def __init__(self, ecs_service: FargateService, log_group: LogGroup):
+        self.log_group = log_group
         self.ecs_service = ecs_service
 
-    def cpu_ave(self, period):
-        return self.ecs_service.metric_cpu_utilization(statistic="average", period=to_duration(period))
+    @property
+    def cpu(self) -> InfraflowMetric:
+        return InfraflowMetric(self.ecs_service.metric_cpu_utilization())
 
-    def cpu_min(self, period):
-        return self.ecs_service.metric_cpu_utilization(statistic="min", period=to_duration(period))
+    @property
+    def memory(self) -> InfraflowMetric:
+        return InfraflowMetric(self.ecs_service.metric_memory_utilization())
 
-    def cpu_max(self, period):
-        return self.ecs_service.metric_cpu_utilization(statistic="max", period=to_duration(period))
+    def log_filter(self, id: str, metric_name: str, metric_value: str, filter_pattern: FilterPattern):
+        return MetricFilter(
+            self.ecs_service,
+            id,
+            log_group=self.log_group,
+            metric_namespace=self.ecs_service.stack.stack_name,
+            metric_name=metric_name,
+            filter_pattern=filter_pattern,
+            metric_value=metric_value
+        )
 
-    def memory_ave(self, period):
-        return self.ecs_service.metric_memory_utilization(statistic="average", period=to_duration(period))
-
-    def memory_min(self, period):
-        return self.ecs_service.metric_memory_utilization(statistic="min", period=to_duration(period))
-
-    def memory_max(self, period):
-        return self.ecs_service.metric_memory_utilization(statistic="max", period=to_duration(period))
 
 class EcsServiceAlarms:
     def __init__(self, ecs_service: FargateService):
@@ -36,7 +41,7 @@ class EcsServiceAlarms:
         self.metrics = EcsServiceMetrics(ecs_service)
 
     def cpu_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu_ave(period=over_timespan).create_alarm(
+        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
             alarm_name="ContainerCPUOverThreshold",
             alarm_description="Container CPU Over Threshold",
             evaluation_periods=evaluation_periods,
@@ -46,7 +51,7 @@ class EcsServiceAlarms:
         )
 
     def cpu_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu_ave(period=over_timespan).create_alarm(
+        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
             alarm_name="ContainerCPUUnderThreshold",
             alarm_description="Container CPU Under Threshold",
             evaluation_periods=evaluation_periods,
@@ -56,7 +61,7 @@ class EcsServiceAlarms:
         )
 
     def memory_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu_ave(period=over_timespan).create_alarm(
+        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
             alarm_name="ContainerMemoryOverThreshold",
             alarm_description="Container Memory Over Threshold",
             evaluation_periods=evaluation_periods,
@@ -66,7 +71,7 @@ class EcsServiceAlarms:
         )
 
     def memory_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu_ave(period=over_timespan).create_alarm(
+        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
             alarm_name="ContainerMemoryUnderThreshold",
             alarm_description="Container Memory Under Threshold",
             evaluation_periods=evaluation_periods,
@@ -87,8 +92,8 @@ class EcsServiceWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.cpu_ave(period=period))
-        widget.add_right_metric(self.metrics.memory_ave(period=period))
+        widget.add_left_metric(self.metrics.cpu.average.over(period=period))
+        widget.add_right_metric(self.metrics.memory.average.over(period=period))
         return widget
 
     def cpu_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
@@ -97,7 +102,7 @@ class EcsServiceWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.cpu_ave(period=period))
+        widget.add_left_metric(self.metrics.cpu.average.over(period=period))
         return widget
 
     def memory_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
@@ -106,12 +111,14 @@ class EcsServiceWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.memory_ave(period=period))
+        widget.add_left_metric(self.metrics.memory.average.over(period=period))
         return widget
 
+
 class EcsServiceInstrumentation:
-    def __init__(self, ecs_service: FargateService):
-        self.metrics = EcsServiceMetrics(ecs_service)
+    def __init__(self, ecs_service: FargateService, log_group: LogGroup):
+        self.log_group = log_group
+        self.metrics = EcsServiceMetrics(ecs_service, log_group)
         self.ecs_service = ecs_service
         self.widgets = EcsServiceWidgets(ecs_service)
         self.alarms = EcsServiceAlarms(ecs_service)

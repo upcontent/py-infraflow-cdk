@@ -2,6 +2,7 @@ import copy
 from datetime import timedelta
 from typing import Union
 
+from aws_cdk.aws_logs import LogGroup
 from constructs import Construct
 from aws_cdk import aws_ecs as ecs, Duration
 from aws_cdk import aws_ecs_patterns as ecs_patterns
@@ -9,11 +10,13 @@ from aws_cdk import aws_ecr_assets as assets
 from aws_cdk.aws_ec2 import SubnetSelection, SubnetType, Subnet, SubnetFilter
 from aws_cdk.aws_applicationautoscaling import ScalingInterval, Schedule
 from aws_cdk import aws_sqs as sqs
-from aws_cdk.aws_ecs import Cluster, FargatePlatformVersion, PropagatedTagSource
+from aws_cdk.aws_ecs import Cluster, FargatePlatformVersion, PropagatedTagSource, LogDriver
 from aws_cdk.aws_iam import Role
 
 from infraflow.cdk import ServiceStageStack
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.docker import EcsServiceInstrumentation
+from infraflow.cdk.instrumentation.queues import QueueInstrumentation
 from infraflow.cdk.queue import QueueSubscription
 from infraflow.cdk.sg.patterns import SecurityGroupTarget
 
@@ -74,6 +77,8 @@ class EcsCluster:
         vpc = self.scope.env.vpc
 
         self.cluster = ecs.Cluster(self.scope, cluster_name, vpc=vpc)
+        self.queue_instrumentation = dict[sqs.Queue, QueueInstrumentation]
+        self.service_instrumentation = dict[ecs.FargateService, EcsServiceInstrumentation]
 
     def get_image(self, image: ContainerImage, name):
         if image.path:
@@ -100,12 +105,17 @@ class EcsCluster:
             infraflow_pattern=self,
         ))
 
+    def create_logs(self, service_name: str) -> (LogGroup, LogDriver):
+        log_group = LogGroup(self, service_name=service_name+"Logs")
+        return log_group, LogDriver.aws_logs(stream_prefix="", log_group=log_group)
+
     def load_balanced_service(
             self,
             name,
             container: ContainerInstanceInfo
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
+        log_group, log_driver = self.create_logs(name)
         alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -118,6 +128,7 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 command=container.command,
+                log_driver=log_driver,
                 task_role=self.task_role,
                 execution_role=self.execution_role,
             ),
@@ -129,6 +140,7 @@ class EcsCluster:
             memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
         )  # Default is True
         # subnet workaround, since assigning above didnt work [https://github.com/aws/aws-cdk/issues/5892]
+        self.service_instrumentation[alb_fargate_service.service] = EcsServiceInstrumentation(alb_fargate_service.service, log_group)
         cfn_lb = alb_fargate_service.load_balancer.node.default_child
         cfn_lb.subnets = [subnet.subnet_id for subnet in self.scope.env.service_subnets(self.subnet_type)]
         return alb_fargate_service
@@ -176,13 +188,15 @@ class EcsCluster:
             retry=queue.queue_url,
             dlq=dead_letter_queue
         )
-        return ecs_patterns.QueueProcessingFargateService(
+        log_group, log_driver = self.create_logs(name)
+        service = ecs_patterns.QueueProcessingFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
             min_scaling_capacity=container.count,
             max_scaling_capacity=container.max_count,
             scaling_steps=scaling.scaling_steps,
             environment=environment,
+            log_driver=log_driver,
             command=container.command,
             queue=queue,
             task_definition=task,
@@ -192,6 +206,9 @@ class EcsCluster:
             assign_public_ip=False,
         )  # Default is True
 
+        self.service_instrumentation[service.service] = EcsServiceInstrumentation(service.service, log_group)
+        return service
+
     def scheduled_service(
             self,
             name,
@@ -199,7 +216,8 @@ class EcsCluster:
             schedule: Union[Duration, timedelta, int]
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        return ecs_patterns.ScheduledFargateTask(
+        log_group, log_driver = self.create_logs(name)
+        service = ecs_patterns.ScheduledFargateTask(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
             cpu=container.size.cpu,  # Default is 256
@@ -210,6 +228,7 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 task_role=self.task_role,
+                log_driver=log_driver,
                 execution_role=self.execution_role,
                 command=container.command
             ),
@@ -218,6 +237,8 @@ class EcsCluster:
             security_groups=[self.get_security_group(name)],
             memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
         )  # Default is True
+        # self.service_instrumentation[service] = EcsServiceInstrumentation(service, log_group)
+        return service
 
 
 def add_queue_environment_variables(

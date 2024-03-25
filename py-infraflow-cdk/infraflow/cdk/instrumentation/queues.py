@@ -6,41 +6,25 @@ from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWi
 from aws_cdk.aws_sqs import Queue
 
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
 class QueueMetrics:
     def __init__(self, queue: Queue):
         self.queue = queue
 
-    def sent_ave(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_number_of_messages_sent(period=to_duration(period) if period else None, statistic="average")
+    @property
+    def sent(self) -> InfraflowMetric:
+        return InfraflowMetric(self.queue.metric_number_of_messages_sent())
 
-    def sent_max(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_number_of_messages_sent(period=to_duration(period) if period else None, statistic="max")
+    @property
+    def length(self) -> InfraflowMetric:
+        return InfraflowMetric(self.queue.metric_approximate_number_of_messages_visible())
 
-    def sent_min(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_number_of_messages_sent(period=to_duration(period) if period else None, statistic="min")
+    @property
+    def age_of_oldest(self):
+        return InfraflowMetric(self.queue.metric_approximate_age_of_oldest_message())
 
-    def sent_sum(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_number_of_messages_sent(period=to_duration(period) if period else None, statistic="sum")
-
-    def length_ave(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_number_of_messages_visible(period=to_duration(period) if period else None, statistic="average")
-
-    def length_max(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_number_of_messages_visible(period=to_duration(period) if period else None, statistic="max")
-
-    def length_min(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_number_of_messages_visible(period=to_duration(period) if period else None, statistic="min")
-
-    def age_of_oldest_ave(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_age_of_oldest_message(period=to_duration(period) if period else None, statistic="average")
-
-    def age_of_oldest_max(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_age_of_oldest_message(period=to_duration(period) if period else None, statistic="max")
-
-    def age_of_oldest_min(self, period: Union[int, timedelta, Duration]):
-        return self.queue.metric_approximate_age_of_oldest_message(period=to_duration(period) if period else None, statistic="min")
 
 
 class QueueAlarms:
@@ -49,7 +33,7 @@ class QueueAlarms:
         self.metrics = QueueMetrics(queue)
 
     def age_of_oldest_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.age_of_oldest_ave(period).create_alarm(
+        return self.metrics.age_of_oldest.average.over(period).create_alarm(
             alarm_name=f"{self.queue.queue_name}_AgeOfOldestOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -60,7 +44,7 @@ class QueueAlarms:
         )
 
     def length_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.length_ave(period).create_alarm(
+        return self.metrics.length.average.over(period).create_alarm(
             alarm_name=f"{self.queue.queue_name}_LengthOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -71,7 +55,7 @@ class QueueAlarms:
         )
 
     def sent_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.sent_ave(period).create_alarm(
+        return self.metrics.sent.average.over(period).create_alarm(
             alarm_name=f"{self.queue.queue_name}_SentOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -93,7 +77,7 @@ class QueueWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.age_of_oldest_max(period=period))
+        widget.add_left_metric(self.metrics.age_of_oldest.max.over(period=period))
         return widget
 
     def length_max_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
@@ -102,7 +86,7 @@ class QueueWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.length_max(period=period))
+        widget.add_left_metric(self.metrics.length.max.over(period=period))
         return widget
 
     def sent_sum_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
@@ -111,7 +95,7 @@ class QueueWidgets:
             height=height,
             width=width,
         )
-        widget.add_left_metric(self.metrics.sent_sum(period=period))
+        widget.add_left_metric(self.metrics.sent.sum.over(period=period))
         return widget
 
 
