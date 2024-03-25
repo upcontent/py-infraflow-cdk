@@ -77,8 +77,8 @@ class EcsCluster:
         vpc = self.scope.env.vpc
 
         self.cluster = ecs.Cluster(self.scope, cluster_name, vpc=vpc)
-        self.queue_instrumentation = dict[sqs.Queue, QueueInstrumentation]
-        self.service_instrumentation = dict[ecs.FargateService, EcsServiceInstrumentation]
+        self.queue_instrumentation: dict[sqs.Queue, QueueInstrumentation] = {}
+        self.service_instrumentation: dict[ecs.FargateService, EcsServiceInstrumentation] = {}
 
     def get_image(self, image: ContainerImage, name):
         if image.path:
