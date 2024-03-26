@@ -1,12 +1,16 @@
+import builtins
+import typing
 from datetime import timedelta
 from typing import Union
 
+import jsii
 from aws_cdk import Duration
-from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWidget
+from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWidget, Metric
 from aws_cdk.aws_sqs import Queue
 from constructs import Construct
 
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.alarms import AlarmsBase
 from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
@@ -29,50 +33,42 @@ class QueueMetrics:
 
 
 
-class QueueAlarms:
-    def __init__(self, queue: Queue, scope: Construct=None):
+class QueueAlarms(AlarmsBase):
+    def __init__(self, queue: Queue, name: str = None, scope: Construct = None):
+        super().__init__(name or queue.queue_name, queue, scope or queue.stack)
         self.queue = queue
         self.metrics = QueueMetrics(queue)
-        self.scope = queue.stack if scope is None else scope
 
     def age_of_oldest_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.age_of_oldest.average.over(period).create_alarm(
-            id=f"{self.queue.queue_name}AgeOfOldestOverThreshold",
-            scope=self.scope,
-            alarm_name=f"{self.queue.queue_name}_AgeOfOldestOverThreshold",
+        return self.create_alarm(
+            self.metrics.age_of_oldest.average.over(period),
+            name=f"AgeOfOldestOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
             comparison_operator=ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-            period=to_duration(period),
-            statistic="average",
             treat_missing_data=TreatMissingData.NOT_BREACHING,
         )
 
     def length_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.length.average.over(period).create_alarm(
-            id=f"{self.queue.queue_name}_LengthOverThreshold",
-            alarm_name=f"{self.queue.queue_name}_LengthOverThreshold",
-            scope=self.scope,
+        return self.create_alarm(
+            self.metrics.length.average.over(period),
+            name=f"LengthOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
             comparison_operator=ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-            period=to_duration(period),
-            statistic="average",
             treat_missing_data=TreatMissingData.NOT_BREACHING,
         )
 
     def sent_over_threshold(self, threshold: int, period: Union[int, timedelta, Duration], evaluation_periods: int):
-        return self.metrics.sent.average.over(period).create_alarm(
-            id=f"{self.queue.queue_name}_SentOverThreshold",
-            alarm_name=f"{self.queue.queue_name}_SentOverThreshold",
-            scope=self.scope,
+        return self.create_alarm(
+            metric=self.metrics.sent.average.over(period),
+            name=f"SentOverThreshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
             comparison_operator=ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-            period=to_duration(period),
-            statistic="average",
             treat_missing_data=TreatMissingData.NOT_BREACHING,
         )
+
 
 
 class QueueWidgets:

@@ -8,6 +8,7 @@ from aws_cdk.aws_logs import MetricFilter, FilterPattern
 from constructs import Construct
 
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.alarms import AlarmsBase
 from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
@@ -52,18 +53,18 @@ class LambdaMetrics:
         )
 
 
-class LambdaAlarms:
-    def __init__(self, function: Function, reserved_concurrency: int, scope: Construct=None):
+class LambdaAlarms(AlarmsBase):
+    def __init__(self, function: Function, reserved_concurrency: int, name: str = None, scope: Construct = None):
+        super().__init__(name or function.function_name, function, scope or function.stack)
         self.function = function
         self.metrics = LambdaMetrics(function)
         self.reserved_concurrency = reserved_concurrency
         self.scope = function.stack if scope is None else scope
 
     def running_longer_than_expected(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, percent_of_timeout_threshold: float):
-        return self.metrics.duration.max.over(over_timespan).create_alarm(
-            id=f"{self.function.function_name}LambdaRunningLongerThanExpected",
-            alarm_name=f"{self.function.function_name}LambdaRunningLongerThanExpected",
-            scope=self.scope,
+        return self.create_alarm(
+            self.metrics.duration.max.over(over_timespan),
+            name=f"LambdaRunningLongerThanExpected",
             alarm_description="Lambda running longer than expected",
             threshold=to_duration(round(self.function.timeout.to_seconds() * percent_of_timeout_threshold)),
             evaluation_periods=evaluation_periods,
@@ -72,10 +73,9 @@ class LambdaAlarms:
         )
 
     def invocations_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: int):
-        return self.metrics.invocations.average.over(over_timespan).create_alarm(
-            id=f"{self.function.function_name}LambdaInvocationsExceedThreshold",
-            alarm_name=f"{self.function.function_name}LambdaInvocationsExceedThreshold",
-            scope=self.scope,
+        return self.create_alarm(
+            self.metrics.invocations.average.over(over_timespan),
+            name=f"LambdaInvocationsExceedThreshold",
             alarm_description="Lambda invocations exceed threshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -84,10 +84,9 @@ class LambdaAlarms:
         )
 
     def concurrency_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, percent_of_max_threshold: float):
-        return self.metrics.concurrent_executions.average.over(over_timespan).create_alarm(
-            id=f"{self.function.function_name}LambdaConcurrencyExceedThreshold",
-            alarm_name=f"{self.function.function_name}LambdaConcurrencyExceedThreshold",
-            scope=self.scope,
+        return self.create_alarm(
+            self.metrics.concurrent_executions.average.over(over_timespan),
+            name=f"{self.function.function_name}LambdaConcurrencyExceedThreshold",
             alarm_description="Lambda concurrency exceed threshold",
             threshold=round(self.reserved_concurrency * percent_of_max_threshold),
             evaluation_periods=evaluation_periods,
@@ -96,10 +95,9 @@ class LambdaAlarms:
         )
 
     def errors_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.errors.average.over(over_timespan).create_alarm(
-            id=f"{self.function.function_name}LambdaErrorsExceedThreshold",
-            alarm_name=f"{self.function.function_name}LambdaErrorsExceedThreshold",
-            scope=self.scope,
+        return self.create_alarm(
+            self.metrics.errors.average.over(over_timespan),
+            name=f"{self.function.function_name}LambdaErrorsExceedThreshold",
             alarm_description="Lambda errors exceed threshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,

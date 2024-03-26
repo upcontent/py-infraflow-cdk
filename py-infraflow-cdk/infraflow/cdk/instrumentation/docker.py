@@ -8,6 +8,7 @@ from aws_cdk.aws_logs import MetricFilter, FilterPattern, LogGroup
 from constructs import Construct
 
 from infraflow.cdk.core.utils import to_duration
+from infraflow.cdk.instrumentation.alarms import AlarmsBase
 from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
@@ -37,17 +38,16 @@ class EcsServiceMetrics:
         )
 
 
-class EcsServiceAlarms:
-    def __init__(self, ecs_service: FargateService, scope: Construct=None):
+class EcsServiceAlarms(AlarmsBase):
+    def __init__(self, ecs_service: FargateService, name: str = None, scope: Construct = None):
+        super().__init__(name or ecs_service.service_name, ecs_service, scope or ecs_service.stack)
         self.ecs_service = ecs_service
         self.metrics = EcsServiceMetrics(ecs_service)
         self.scope = ecs_service.stack if scope is None else scope
 
     def cpu_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            id=f"{self.ecs_service}ContainerCPUOverThreshold",
-            alarm_name=f"{self.ecs_service.service_name}ContainerCPUOverThreshold",
-            scope=self.scope,
+        return self.create_alarm(self.metrics.cpu.average.over(period=over_timespan),
+            name=f"ContainerCPUOverThreshold",
             alarm_description="Container CPU Over Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -56,10 +56,8 @@ class EcsServiceAlarms:
         )
 
     def cpu_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            id=f"{self.ecs_service}ContainerCPUUnderThreshold",
-            alarm_name=f"{self.ecs_service.service_name}ContainerCPUUnderThreshold",
-            scope=self.scope,
+        return self.create_alarm(self.metrics.cpu.average.over(period=over_timespan),
+            name=f"ContainerCPUUnderThreshold",
             alarm_description="Container CPU Under Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -68,10 +66,8 @@ class EcsServiceAlarms:
         )
 
     def memory_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            id=f"{self.ecs_service}ContainerMemoryOverThreshold",
-            scope=self.scope,
-            alarm_name=f"{self.ecs_service.service_name}ContainerMemoryOverThreshold",
+        return self.create_alarm(self.metrics.cpu.average.over(period=over_timespan),
+            name=f"ContainerMemoryOverThreshold",
             alarm_description="Container Memory Over Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -80,10 +76,8 @@ class EcsServiceAlarms:
         )
 
     def memory_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
-        return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            id=f"{self.ecs_service.service_name}ContainerMemoryUnderThreshold",
-            alarm_name=f"{self.ecs_service.service_name}ContainerMemoryUnderThreshold",
-            scope=self.scope,
+        return self.create_alarm(self.metrics.cpu.average.over(period=over_timespan),
+            name=f"ContainerMemoryUnderThreshold",
             alarm_description="Container Memory Under Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
