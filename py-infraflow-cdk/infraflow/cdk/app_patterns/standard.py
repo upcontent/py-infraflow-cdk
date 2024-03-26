@@ -1,12 +1,17 @@
-from typing import Optional, Any
+from typing import Optional, Any, Union
 
 from aws_cdk import App, aws_sns, IResource
 import aws_cdk.aws_lambda as aws_lambda
 import aws_cdk.aws_apigateway as apigateway
 import aws_cdk.aws_events as aws_events
 from aws_cdk.aws_ec2 import InterfaceVpcEndpointAwsService
+from aws_cdk.aws_ecs import FargateService
+from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
 from aws_cdk.aws_iam import IRole, Role, ServicePrincipal, ManagedPolicy, PolicyStatement, Effect
+from aws_cdk.aws_lambda import Function
+from aws_cdk.aws_sqs import Queue
 from aws_cdk.aws_stepfunctions import IStateMachine
+from constructs import Construct
 
 from infraflow.cdk import ServiceStageStack, EnvConfig
 from infraflow.cdk.app_patterns.express_default_dlq_processor import ProcessorConfig, DualPriorityResilientJob, \
@@ -15,7 +20,7 @@ from infraflow.cdk.core.environment import DEFAULT_INTERFACE_SERVICES
 from infraflow.cdk.docker import EcsCluster
 from infraflow.cdk.events import EventBridgeEvents, InfraflowEventBus, SnsEvents, Event
 from infraflow.cdk.iam import PolicyBuilder, IamAction
-from infraflow.cdk.lambdas import LambdaContext
+from infraflow.cdk.lambdas import LambdaContext, QueueFunctionConstruct
 from infraflow.cdk.sg.patterns import Tiered
 from infraflow.cdk.sg.ports import port_for
 
@@ -128,7 +133,7 @@ class StandardServiceStage(ServiceStageStack):
     def handle_event(self, event: Event, default: ProcessorConfig, express: ProcessorConfig = None):
         uses_docker = express.type == PROCESSOR_TYPE.ECS_DOCKER or default.type == PROCESSOR_TYPE.ECS_DOCKER
         uses_lambda = express.type == PROCESSOR_TYPE.LAMBDA_PYTHON or default.type == PROCESSOR_TYPE.LAMBDA_PYTHON
-        processor = DualPriorityResilientJob(
+        job = DualPriorityResilientJob(
             default_processor=default,
             express_processor=express,
             ecs_cluster=self.ecs_cluster if uses_docker else None,
@@ -137,7 +142,34 @@ class StandardServiceStage(ServiceStageStack):
             construct_id=event.id+"Processor",
             scope=self
         )
-        processor.create_resources()
+        job.create_resources()
+        return job
+
+    def instrumentation_for_lambda(self, resource: Union[Function, QueueFunctionConstruct]):
+        if isinstance(resource, Function):
+            return self.lambda_context.lambda_instrumentation[resource]
+        elif isinstance(resource, QueueFunctionConstruct):
+            return self.lambda_context.lambda_instrumentation[resource.function]
+        else:
+            raise ValueError("")
+
+    def instrumentation_for_queue(self, resource: Union[Queue, QueueFunctionConstruct, QueueProcessingFargateService]):
+        if isinstance(resource, Queue):
+            return self.lambda_context.queue_instrumentation[resource] or self.ecs_cluster.queue_instrumentation[resource]
+        elif isinstance(resource, QueueFunctionConstruct):
+            return self.lambda_context.queue_instrumentation[resource.queue]
+        elif isinstance(resource, QueueProcessingFargateService):
+            return self.ecs_cluster.queue_instrumentation[resource.sqs_queue]
+        else:
+            raise ValueError("")
+
+    def instrumentation_for_ecs_service(self, resource: Union[FargateService, QueueProcessingFargateService]):
+        if isinstance(resource, FargateService):
+            return self.ecs_cluster.service_instrumentation[resource]
+        elif isinstance(resource, QueueProcessingFargateService):
+            return self.ecs_cluster.service_instrumentation[resource.service]
+        else:
+            raise ValueError("")
 
     def use_ecs(self):
         if not self._ecs_execution_role:

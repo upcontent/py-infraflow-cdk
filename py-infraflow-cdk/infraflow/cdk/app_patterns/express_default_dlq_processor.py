@@ -1,16 +1,17 @@
 import copy
 import datetime
 from enum import Enum
-from typing import Union
+from typing import Union, Optional
 
 from aws_cdk import Duration
+from aws_cdk.aws_ecs_patterns import QueueProcessingFargateService
 from aws_cdk.aws_sqs import Queue
 from constructs import Construct
 
 from infraflow.cdk.docker import EcsCluster, add_queue_environment_variables, ContainerSize, ContainerImage, \
     ContainerInstanceInfo
 from infraflow.cdk.events import Event
-from infraflow.cdk.lambdas import LambdaContext
+from infraflow.cdk.lambdas import LambdaContext, QueueFunctionConstruct
 from infraflow.cdk.queue import QueueSubscription
 
 
@@ -98,16 +99,22 @@ class DualPriorityResilientJob(Construct):
         self.express_processor = express_processor
         # self.retry_processor = retry_processor
         self.dead_letter_processor = dead_letter_processor
+        self.express_ecs: Optional[QueueProcessingFargateService] = None
+        self.default_ecs: Optional[QueueProcessingFargateService] = None
+        self.express_lambda: Optional[QueueFunctionConstruct] = None
+        self.default_lambda: Optional[QueueFunctionConstruct] = None
+        self.dlq = None
 
     def create_resources(self):
         if isinstance(self.dead_letter_processor, LambdaPythonProcessorConfig):
             dead_letter_processor = copy.copy(self.dead_letter_processor)
             dead_letter_processor.max_concurrency = 0
-            dlq = self.create_lambda_processor(dead_letter_processor, 'DeadLetter')
+            dlq = self.create_lambda_processor(dead_letter_processor, 'DeadLetter').queue
         elif isinstance(self.dead_letter_processor, EcsDockerProcessorConfig):
             dlq = Queue(self, 'DeadLetterQueue')
         else:
             dlq = None
+        self.dlq = dlq
 
         # if isinstance(self.retry_processor, LambdaPythonProcessorConfig):
         #     retry_qf = self.create_lambda_processor(self.retry_processor, 'Retry', dlq=dlq)
@@ -120,16 +127,20 @@ class DualPriorityResilientJob(Construct):
         if isinstance(self.default_processor, LambdaPythonProcessorConfig):
             default_qf = self.create_lambda_processor(self.default_processor, 'Default', dlq=dlq)
             self.default_event.subscribe(default_qf)
+            self.default_lambda = default_qf
         elif isinstance(self.default_processor, EcsDockerProcessorConfig):
             queue, service = self.create_ecs_processor(self.default_processor, 'Default')
             self.default_event.subscribe(queue)
+            self.default_ecs = service
 
         if isinstance(self.express_processor, LambdaPythonProcessorConfig):
             express_qf = self.create_lambda_processor(self.express_processor, 'Express', dlq=dlq)
             self.express_event.subscribe(express_qf)
+            self.express_lambda = express_qf
         elif isinstance(self.express_processor, EcsDockerProcessorConfig):
             queue, service = self.create_ecs_processor(self.express_processor, 'Express')
             self.express_event.subscribe(queue)
+            self.express_lambda = service
 
     def create_lambda_processor(self, processor_config: LambdaPythonProcessorConfig, suffix, dlq):
         return self.lambda_context.queued_function(
