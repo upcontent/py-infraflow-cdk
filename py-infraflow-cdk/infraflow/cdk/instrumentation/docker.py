@@ -5,15 +5,17 @@ from aws_cdk import Duration
 from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWidget
 from aws_cdk.aws_ecs import FargateService
 from aws_cdk.aws_logs import MetricFilter, FilterPattern, LogGroup
+from constructs import Construct
 
 from infraflow.cdk.core.utils import to_duration
 from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
 class EcsServiceMetrics:
-    def __init__(self, ecs_service: FargateService, log_group: LogGroup):
+    def __init__(self, ecs_service: FargateService, log_group: LogGroup, scope: Construct=None):
         self.log_group = log_group
         self.ecs_service = ecs_service
+        self.scope = ecs_service.stack if scope is None else scope
 
     @property
     def cpu(self) -> InfraflowMetric:
@@ -36,13 +38,16 @@ class EcsServiceMetrics:
 
 
 class EcsServiceAlarms:
-    def __init__(self, ecs_service: FargateService):
+    def __init__(self, ecs_service: FargateService, scope: Construct=None):
         self.ecs_service = ecs_service
         self.metrics = EcsServiceMetrics(ecs_service)
+        self.scope = ecs_service.stack if scope is None else scope
 
     def cpu_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
         return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            alarm_name="ContainerCPUOverThreshold",
+            id=f"{self.ecs_service}ContainerCPUOverThreshold",
+            alarm_name=f"{self.ecs_service.service_name}ContainerCPUOverThreshold",
+            scope=self.scope,
             alarm_description="Container CPU Over Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -52,7 +57,9 @@ class EcsServiceAlarms:
 
     def cpu_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
         return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            alarm_name="ContainerCPUUnderThreshold",
+            id=f"{self.ecs_service}ContainerCPUUnderThreshold",
+            alarm_name=f"{self.ecs_service.service_name}ContainerCPUUnderThreshold",
+            scope=self.scope,
             alarm_description="Container CPU Under Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -62,7 +69,9 @@ class EcsServiceAlarms:
 
     def memory_over_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
         return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            alarm_name="ContainerMemoryOverThreshold",
+            id=f"{self.ecs_service}ContainerMemoryOverThreshold",
+            scope=self.scope,
+            alarm_name=f"{self.ecs_service.service_name}ContainerMemoryOverThreshold",
             alarm_description="Container Memory Over Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -72,7 +81,9 @@ class EcsServiceAlarms:
 
     def memory_under_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
         return self.metrics.cpu.average.over(period=over_timespan).create_alarm(
-            alarm_name="ContainerMemoryUnderThreshold",
+            id=f"{self.ecs_service.service_name}ContainerMemoryUnderThreshold",
+            alarm_name=f"{self.ecs_service.service_name}ContainerMemoryUnderThreshold",
+            scope=self.scope,
             alarm_description="Container Memory Under Threshold",
             evaluation_periods=evaluation_periods,
             threshold=threshold,
@@ -82,9 +93,10 @@ class EcsServiceAlarms:
 
 
 class EcsServiceWidgets:
-    def __init__(self, ecs_service: FargateService):
+    def __init__(self, ecs_service: FargateService, scope: Construct=None):
         self.ecs_service = ecs_service
         self.metrics = EcsServiceMetrics(ecs_service)
+        self.scope = ecs_service.stack if scope is None else scope
 
     def combined_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
         widget = GraphWidget(
@@ -116,9 +128,10 @@ class EcsServiceWidgets:
 
 
 class EcsServiceInstrumentation:
-    def __init__(self, ecs_service: FargateService, log_group: LogGroup):
+    def __init__(self, ecs_service: FargateService, log_group: LogGroup, scope: Construct=None):
+        self.scope = ecs_service.stack if scope is None else scope
         self.log_group = log_group
-        self.metrics = EcsServiceMetrics(ecs_service, log_group)
+        self.metrics = EcsServiceMetrics(ecs_service, log_group, scope=self.scope)
         self.ecs_service = ecs_service
-        self.widgets = EcsServiceWidgets(ecs_service)
-        self.alarms = EcsServiceAlarms(ecs_service)
+        self.widgets = EcsServiceWidgets(ecs_service, scope=self.scope)
+        self.alarms = EcsServiceAlarms(ecs_service, scope=self.scope)

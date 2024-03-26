@@ -5,14 +5,16 @@ from aws_cdk import Duration
 from aws_cdk.aws_cloudwatch import Metric, ComparisonOperator, TreatMissingData, GraphWidget
 from aws_cdk.aws_lambda import Function
 from aws_cdk.aws_logs import MetricFilter, FilterPattern
+from constructs import Construct
 
 from infraflow.cdk.core.utils import to_duration
 from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
 class LambdaMetrics:
-    def __init__(self, function: Function):
+    def __init__(self, function: Function, scope: Construct=None):
         self.function = function
+        self.scope = function.stack if scope is None else scope
 
     @property
     def duration(self) -> InfraflowMetric:
@@ -51,14 +53,17 @@ class LambdaMetrics:
 
 
 class LambdaAlarms:
-    def __init__(self, function: Function, reserved_concurrency: int):
+    def __init__(self, function: Function, reserved_concurrency: int, scope: Construct=None):
         self.function = function
         self.metrics = LambdaMetrics(function)
         self.reserved_concurrency = reserved_concurrency
+        self.scope = function.stack if scope is None else scope
 
     def running_longer_than_expected(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, percent_of_timeout_threshold: float):
         return self.metrics.duration.max.over(over_timespan).create_alarm(
-            alarm_name="LambdaRunningLongerThanExpected",
+            id=f"{self.function.function_name}LambdaRunningLongerThanExpected",
+            alarm_name=f"{self.function.function_name}LambdaRunningLongerThanExpected",
+            scope=self.scope,
             alarm_description="Lambda running longer than expected",
             threshold=to_duration(round(self.function.timeout.to_seconds() * percent_of_timeout_threshold)),
             evaluation_periods=evaluation_periods,
@@ -68,7 +73,9 @@ class LambdaAlarms:
 
     def invocations_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: int):
         return self.metrics.invocations.average.over(over_timespan).create_alarm(
-            alarm_name="LambdaInvocationsExceedThreshold",
+            id=f"{self.function.function_name}LambdaInvocationsExceedThreshold",
+            alarm_name=f"{self.function.function_name}LambdaInvocationsExceedThreshold",
+            scope=self.scope,
             alarm_description="Lambda invocations exceed threshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -78,7 +85,9 @@ class LambdaAlarms:
 
     def concurrency_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, percent_of_max_threshold: float):
         return self.metrics.concurrent_executions.average.over(over_timespan).create_alarm(
-            alarm_name="LambdaConcurrencyExceedThreshold",
+            id=f"{self.function.function_name}LambdaConcurrencyExceedThreshold",
+            alarm_name=f"{self.function.function_name}LambdaConcurrencyExceedThreshold",
+            scope=self.scope,
             alarm_description="Lambda concurrency exceed threshold",
             threshold=round(self.reserved_concurrency * percent_of_max_threshold),
             evaluation_periods=evaluation_periods,
@@ -88,7 +97,9 @@ class LambdaAlarms:
 
     def errors_exceed_threshold(self, over_timespan: Union[int, timedelta, Duration], evaluation_periods: int, threshold: float):
         return self.metrics.errors.average.over(over_timespan).create_alarm(
-            alarm_name="LambdaErrorsExceedThreshold",
+            id=f"{self.function.function_name}LambdaErrorsExceedThreshold",
+            alarm_name=f"{self.function.function_name}LambdaErrorsExceedThreshold",
+            scope=self.scope,
             alarm_description="Lambda errors exceed threshold",
             threshold=threshold,
             evaluation_periods=evaluation_periods,
@@ -99,9 +110,10 @@ class LambdaAlarms:
 
 
 class LambdaWidgets:
-    def __init__(self, function: Function):
+    def __init__(self, function: Function, scope: Construct=None):
         self.function = function
         self.metrics = LambdaMetrics(function)
+        self.scope = function.stack if scope is None else scope
 
     def errors_sum_widget(self, period: Union[int, timedelta, Duration], width: int, height: int):
         widget = GraphWidget(
@@ -150,11 +162,12 @@ class LambdaWidgets:
 
 
 class LambdaInstrumentation:
-    def __init__(self, function: Function, reserved_concurrency):
-        self.metrics = LambdaMetrics(function)
+    def __init__(self, function: Function, reserved_concurrency, scope: Construct=None):
+        self.scope = function.stack if scope is None else scope
+        self.metrics = LambdaMetrics(function, scope=self.scope)
         self.reserved_concurrency = reserved_concurrency
         self.function = function
-        self.widgets = LambdaWidgets(function)
-        self.alarms = LambdaAlarms(function)
+        self.widgets = LambdaWidgets(function, scope=self.scope)
+        self.alarms = LambdaAlarms(function, scope=self.scope)
         self.log_group = function.log_group
 
