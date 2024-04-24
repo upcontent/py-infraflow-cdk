@@ -128,7 +128,6 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 command=container.command,
-                log_driver=log_driver,
                 task_role=self.task_role,
                 execution_role=self.execution_role,
             ),
@@ -196,7 +195,6 @@ class EcsCluster:
             max_scaling_capacity=container.max_count,
             scaling_steps=scaling.scaling_steps,
             environment=environment,
-            log_driver=log_driver,
             command=container.command,
             queue=queue,
             task_definition=task,
@@ -228,7 +226,6 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 task_role=self.task_role,
-                log_driver=log_driver,
                 execution_role=self.execution_role,
                 command=container.command
             ),
