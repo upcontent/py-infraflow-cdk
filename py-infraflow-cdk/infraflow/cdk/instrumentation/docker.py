@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Union
+from typing import Union, Optional
 
 from aws_cdk import Duration
 from aws_cdk.aws_cloudwatch import ComparisonOperator, TreatMissingData, GraphWidget
@@ -122,7 +122,7 @@ class EcsServiceWidgets:
 
 
 class EcsServiceInstrumentation:
-    def __init__(self, ecs_service: FargateService, log_group: LogGroup, scope: Construct=None):
+    def __init__(self, ecs_service: FargateService, log_group: Optional[LogGroup]=None, scope: Construct=None):
         self.scope = ecs_service.stack if scope is None else scope
         self.log_group = log_group
         self.metrics = EcsServiceMetrics(ecs_service, log_group, scope=self.scope)
