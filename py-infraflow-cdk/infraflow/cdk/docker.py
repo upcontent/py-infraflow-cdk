@@ -115,7 +115,7 @@ class EcsCluster:
             container: ContainerInstanceInfo
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        log_group, log_driver = self.create_logs(name)
+        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
         alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -188,7 +188,7 @@ class EcsCluster:
             retry=queue.queue_url,
             dlq=dead_letter_queue
         )
-        log_group, log_driver = self.create_logs(name)
+        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
         service = ecs_patterns.QueueProcessingFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -216,7 +216,7 @@ class EcsCluster:
             schedule: Union[Duration, timedelta, int]
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        log_group, log_driver = self.create_logs(name)
+        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
         service = ecs_patterns.ScheduledFargateTask(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
