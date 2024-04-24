@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py-infraflow-cdk"
-version = "0.1.9.8.9.0"
+version = "0.1.9.8.9.2"
 description = "Build Event Based and Microservice infrastructure and connections using these reusable AWS CDK patterns"
 authors = ["Matthew Beatty <infraflow@upcontent.com>"]
 license = "MIT"

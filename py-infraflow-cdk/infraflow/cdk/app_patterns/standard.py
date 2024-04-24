@@ -194,6 +194,17 @@ class StandardServiceStage(ServiceStageStack):
                     principals=[ServicePrincipal("ecs-tasks.amazonaws.com")]
                 )
             )
+            self._ecs_execution_role.add_to_policy(
+                PolicyStatement(
+                    effect=Effect.ALLOW,
+                    resources=['*'],
+                    actions=['ssm:GetParameters',
+                             'ssm:GetParameter',
+                             'ssm:GetParametersByPath',
+                             'secretsmanager:GetSecretValue',
+                             'kms:Decrypt']
+                )
+            ) ## 04.24 -> allow ecs execution: ssm:GetParameters, secretsmanager:GetSecretValue AND kms:Decrypt
 
         self._ecs_cluster = self._ecs_cluster or EcsCluster(
             self,
@@ -256,6 +267,18 @@ class StandardServiceStage(ServiceStageStack):
     @property
     def app_role(self) -> IRole:
         self._app_role = self._app_role or Role(self, 'Role', assumed_by=ServicePrincipal("lambda.amazonaws.com"))
+        self._app_role.add_to_policy(
+            PolicyStatement(
+                effect=Effect.ALLOW,
+                resources=['*'],
+                actions=['ssm:GetParameters',
+                         'ssm:GetParameter',
+                         'ssm:GetParametersByPath',
+                         'secretsmanager:GetSecretValue',
+                         'kms:Decrypt']
+            )
+        )  ## 04.24 -> allow ecs execution: ssm:GetParameters, secretsmanager:GetSecretValue AND kms:Decrypt
+
         self._app_role.assume_role_policy.add_statements(
             PolicyStatement(
                 effect=Effect.ALLOW,
