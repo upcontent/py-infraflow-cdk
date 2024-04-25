@@ -106,7 +106,7 @@ class EcsCluster:
         ))
 
     def create_logs(self, service_name: str) -> (LogGroup, LogDriver):
-        log_group = LogGroup(id=service_name+"Logs")
+        log_group = LogGroup(id=service_name+"Logs", scope=self.scope)
         return log_group, LogDriver.aws_logs(stream_prefix="", log_group=log_group)
 
     def load_balanced_service(
