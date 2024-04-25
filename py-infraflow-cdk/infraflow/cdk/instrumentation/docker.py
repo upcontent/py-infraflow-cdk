@@ -13,7 +13,7 @@ from infraflow.cdk.instrumentation.metrics import InfraflowMetric
 
 
 class EcsServiceMetrics:
-    def __init__(self, ecs_service: FargateService, log_group: LogGroup, scope: Construct=None):
+    def __init__(self, ecs_service: FargateService, log_group: Optional[LogGroup]=None, scope: Construct=None):
         self.log_group = log_group
         self.ecs_service = ecs_service
         self.scope = ecs_service.stack if scope is None else scope

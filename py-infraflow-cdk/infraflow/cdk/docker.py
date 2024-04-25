@@ -115,7 +115,7 @@ class EcsCluster:
             container: ContainerInstanceInfo
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
+        log_group, log_driver = self.create_logs(name)
         alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -128,6 +128,7 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 command=container.command,
+                log_driver=log_driver,
                 task_role=self.task_role,
                 execution_role=self.execution_role,
             ),
@@ -187,7 +188,7 @@ class EcsCluster:
             retry=queue.queue_url,
             dlq=dead_letter_queue
         )
-        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
+        log_group, log_driver = self.create_logs(name)
         service = ecs_patterns.QueueProcessingFargateService(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -195,6 +196,7 @@ class EcsCluster:
             max_scaling_capacity=container.max_count,
             scaling_steps=scaling.scaling_steps,
             environment=environment,
+            log_driver=log_driver,
             command=container.command,
             queue=queue,
             task_definition=task,
@@ -214,7 +216,7 @@ class EcsCluster:
             schedule: Union[Duration, timedelta, int]
     ):
         environment = {**self.scope.env.environment_vars, **container.environment}
-        # log_group, log_driver = self.create_logs(name) ## causing issues April 24 2024. ignore for now, SH
+        log_group, log_driver = self.create_logs(name)
         service = ecs_patterns.ScheduledFargateTask(
             self.scope, f"{name}Service",
             cluster=self.cluster,  # Required
@@ -226,6 +228,7 @@ class EcsCluster:
                 container_port=80,
                 environment=environment,
                 task_role=self.task_role,
+                log_driver=log_driver,
                 execution_role=self.execution_role,
                 command=container.command
             ),
