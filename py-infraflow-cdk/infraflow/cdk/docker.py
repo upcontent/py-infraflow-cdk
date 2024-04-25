@@ -140,7 +140,7 @@ class EcsCluster:
             memory_limit_mib=container.size.memory_limit_mib,  # Default is 512
         )  # Default is True
         # subnet workaround, since assigning above didnt work [https://github.com/aws/aws-cdk/issues/5892]
-        self.service_instrumentation[alb_fargate_service.service] = EcsServiceInstrumentation(alb_fargate_service.service)
+        self.service_instrumentation[alb_fargate_service.service] = EcsServiceInstrumentation(ecs_service=alb_fargate_service.service, log_group=log_group)
         cfn_lb = alb_fargate_service.load_balancer.node.default_child
         cfn_lb.subnets = [subnet.subnet_id for subnet in self.scope.env.service_subnets(self.subnet_type)]
         return alb_fargate_service
@@ -206,7 +206,7 @@ class EcsCluster:
             assign_public_ip=False,
         )  # Default is True
 
-        self.service_instrumentation[service.service] = EcsServiceInstrumentation(service.service)
+        self.service_instrumentation[service.service] = EcsServiceInstrumentation(ecs_service=service.service, log_group=log_group)
         return service
 
     def scheduled_service(
