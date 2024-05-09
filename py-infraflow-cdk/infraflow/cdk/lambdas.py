@@ -91,7 +91,7 @@ class LambdaContext:
         return func
 
     def construct_name(self, handler: str, name: str, suffix: str):
-        base_name = name or caps_camel(handler.split(".")[1])
+        base_name = name or caps_camel(handler.split(".")[1]) if len(handler.split(".")) > 1 else handler
         constructed_name = caps_camel(f"{base_name}_{suffix}" if suffix else base_name)
         return constructed_name
 

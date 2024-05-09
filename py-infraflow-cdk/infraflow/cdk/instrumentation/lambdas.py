@@ -166,6 +166,6 @@ class LambdaInstrumentation:
         self.reserved_concurrency = reserved_concurrency
         self.function = function
         self.widgets = LambdaWidgets(function, scope=self.scope)
-        self.alarms = LambdaAlarms(function, scope=self.scope)
+        self.alarms = LambdaAlarms(function, scope=self.scope, reserved_concurrency=reserved_concurrency)
         self.log_group = function.log_group
 

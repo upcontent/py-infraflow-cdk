@@ -129,7 +129,7 @@ class DualPriorityResilientJob(Construct):
             self.default_event.subscribe(default_qf)
             self.default_lambda = default_qf
         elif isinstance(self.default_processor, EcsDockerProcessorConfig):
-            queue, service = self.create_ecs_processor(self.default_processor, 'Default')
+            queue, service = self.create_ecs_processor(self.default_processor, 'Default', retry_url=None, dlq_url=self.dlq.queue_url if self.dlq else None)
             self.default_event.subscribe(queue)
             self.default_ecs = service
 
@@ -138,7 +138,7 @@ class DualPriorityResilientJob(Construct):
             self.express_event.subscribe(express_qf)
             self.express_lambda = express_qf
         elif isinstance(self.express_processor, EcsDockerProcessorConfig):
-            queue, service = self.create_ecs_processor(self.express_processor, 'Express')
+            queue, service = self.create_ecs_processor(self.express_processor, 'Express', retry_url=None, dlq_url=self.dlq.queue_url if self.dlq else None)
             self.express_event.subscribe(queue)
             self.express_lambda = service
 

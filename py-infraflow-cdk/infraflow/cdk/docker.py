@@ -10,7 +10,7 @@ from aws_cdk import aws_ecr_assets as assets
 from aws_cdk.aws_ec2 import SubnetSelection, SubnetType, Subnet, SubnetFilter
 from aws_cdk.aws_applicationautoscaling import ScalingInterval, Schedule
 from aws_cdk import aws_sqs as sqs
-from aws_cdk.aws_ecs import Cluster, FargatePlatformVersion, PropagatedTagSource, LogDriver
+from aws_cdk.aws_ecs import Cluster, FargatePlatformVersion, PropagatedTagSource, LogDriver, ContainerImage
 from aws_cdk.aws_iam import Role
 
 from infraflow.cdk import ServiceStageStack
@@ -203,6 +203,7 @@ class EcsCluster:
             propagate_tags=PropagatedTagSource.SERVICE,
             security_groups=[self.get_security_group(name)],
             task_subnets=self.subnets(),
+            image=None,
             assign_public_ip=False,
         )  # Default is True
 

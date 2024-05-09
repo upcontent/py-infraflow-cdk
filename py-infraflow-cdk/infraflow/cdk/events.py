@@ -1,4 +1,6 @@
-from typing import Any, Union
+import copy
+
+from typing import Any, Union, Optional
 from typing import TypeVar, Generic
 
 from infraflow.util import caps_camel
@@ -30,7 +32,7 @@ class Rule:
 
     def id(self):
         values = (
-            self.value if self.value else
+            self.value if self.value is not None else
             "Exists" if self.exists else
             "NotExists" if self.exists is False else
             "".join(self.values) if self.values else
@@ -72,20 +74,22 @@ class Event:
         self.filters: list[Rule] = []
         self.bus_id = bus_id
 
+    def copy(self):
+        """
+        This then needs to be used to return a (deep) copy of everything
+        """
+        raise NotImplemented
+
+
     def express_only(self):
-        self.add_filter(Rule("express", True))
-        self.priority = "express"
-        return self
+        return self.with_filter(Rule("express", True), priority="express")
 
     def non_express(self):
         self.add_filter(Rule("express", False))
-        self.priority = "default"
-        return self
+        return self.with_filter(Rule("express", False), priority="default")
 
     def with_priority(self, priority: int):
-        self.add_filter(Rule("priority", priority))
-        self.priority = f"priority_{priority}"
-        return self
+        return self.with_filter(Rule("priority", priority), priority=f"priority_{priority}")
 
     def with_priorities(self, start: int, stop: int):
         self.add_filter(Rule("priority", [start, stop]))
@@ -93,19 +97,25 @@ class Event:
         return self
 
     def with_prop(self, key: str):
-        self.add_filter(Rule(key, exists=True))
-        return self
+        return self.with_filter(Rule(key, exists=True))
 
     def with_true_prop(self, key: str):
-        self.add_filter(Rule(key, generic={"equals-ignore-case": ["true"]}))
-        return self
+        return self.with_filter(Rule(key, generic={"equals-ignore-case": ["true"]}))
 
     def with_prop_equal(self, key: str, value: Any):
-        self.add_filter(Rule(key, value))
-        return self
+        self.add_filter(Rule(key, value)) #replace the add_filter function with with_filter
+        return self.with_filter(Rule(key, value))
 
     def add_filter(self, filter: Rule):
         self.filters.append(filter)
+
+    def with_filter(self, filter: Rule, priority: Optional[Any] = None):
+        new_event = self.copy()
+        new_event.add_filter(filter)
+        if priority is not None:
+            new_event.priority = priority
+
+        return new_event
 
     @property
     def suffix(self):
@@ -141,6 +151,11 @@ class SnsEvent(Event):
         super().__init__(stage, bus_id, event_key)
         self.bus = bus
 
+    def copy(self):
+        new_event = SnsEvent(self.stage, self.bus_id, self.event_key, self.bus)
+        new_event.priority = self.priority
+        new_event.filters = copy.deepcopy(self.filters)
+
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         for queue in subscribers:
             self.bus.add_subscription(self.get_sns_sqs_subscription(queue))
@@ -166,6 +181,11 @@ class EventBridgeEvent(Event):
     def __init__(self, stage: ServiceStageStack, bus_id: str, event_key: str, bus: events.IEventBus):
         super().__init__(stage, bus_id, event_key)
         self.bus = bus
+
+    def copy(self):
+        new_event = SnsEvent(self.stage, self.bus_id, self.event_key, self.bus)
+        new_event.priority = self.priority
+        new_event.filters = copy.deepcopy(self.filters)
 
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         targets_ = [get_eb_target(subscriber) for subscriber in subscribers]
