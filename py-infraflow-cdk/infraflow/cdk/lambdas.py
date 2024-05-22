@@ -30,7 +30,8 @@ class LambdaContext:
                  runtime: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_9,
                  vpc: bool = True,
                  subnet_type: SubnetType = SubnetType.PRIVATE_WITH_EGRESS,
-                 tracing=aws_lambda.Tracing.ACTIVE
+                 tracing=aws_lambda.Tracing.ACTIVE,
+                 excluded_code=[]
                  ):
         self.vpc = vpc
         self.tracing = tracing
@@ -44,6 +45,7 @@ class LambdaContext:
         self.functions: list[aws_lambda.Function] = []
         self.queue_instrumentation: dict[aws_sqs.Queue, QueueInstrumentation] = {}
         self.lambda_instrumentation: dict[aws_lambda.Function, LambdaInstrumentation] = {}
+        self.excluded_code = excluded_code
 
     # def to_cdk(self):
     #     return dict(
@@ -66,7 +68,7 @@ class LambdaContext:
                 id=constructed_name,
                 handler=handler,
                 scope=scope_override or self.stage,
-                code=aws_lambda.Code.from_asset(self.path),
+                code=aws_lambda.Code.from_asset(self.path, {'exclude': self.excluded_code}), ## TODO SH here we can have an exclude pattern
                 runtime=self.runtime,
                 reserved_concurrent_executions=max_concurrency,
                 timeout=to_duration(timeout),
@@ -109,7 +111,13 @@ class LambdaContext:
         queued_function = QueueFunctionConstruct(self.stage, constructed_name)
         queue = aws_sqs.Queue(queued_function, 'Queue', visibility_timeout=to_duration(timeout), **queue_config)
         self.queue_instrumentation[queue] = QueueInstrumentation(queue)
-        func = self.function(handler, 'Function', scope_override=queued_function, max_concurrency=max_concurrency, timeout=timeout)
+        func = self.function(
+            handler,
+            'Function',
+            scope_override=queued_function,
+            max_concurrency=max_concurrency,
+            timeout=timeout
+        )
         func.add_event_source(sources.SqsEventSource(queue, batch_size=batch_size))
         queued_function.queue = queue
         queued_function.function = func

@@ -33,6 +33,7 @@ class StandardServiceStage(ServiceStageStack):
                  stage_name: str,
                  env: EnvConfig,
                  src_path: str = "src",
+                 excluded_code=None,
                  db_ports=[],
                  python_version: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_9,
                  vpc_endpoint_services: list[InterfaceVpcEndpointAwsService] = DEFAULT_INTERFACE_SERVICES,
@@ -45,6 +46,7 @@ class StandardServiceStage(ServiceStageStack):
         self._event_publish_policy = None
         self.python_version = python_version
         self.src_path = src_path
+        self.excluded_code = excluded_code
         self._lambda_context: Optional[LambdaContext] = None
         self._api: Optional[apigateway.IRestApi] = None
         self._event_bridge_bus_cdk: Optional[aws_events.IEventBus] = None
@@ -112,7 +114,8 @@ class StandardServiceStage(ServiceStageStack):
             self,
             path=self.src_path,
             role=self.app_role,
-            runtime=self.python_version
+            runtime=self.python_version,
+            excluded_code=self.excluded_code
         )
 
     def managed_policy(self, id, *, arn=None, name=None):
