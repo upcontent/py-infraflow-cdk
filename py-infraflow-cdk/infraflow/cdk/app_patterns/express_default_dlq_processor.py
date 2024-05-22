@@ -142,7 +142,7 @@ class DualPriorityResilientJob(Construct):
             self.express_event.subscribe(queue)
             self.express_lambda = service
 
-    def create_lambda_processor(self, processor_config: LambdaPythonProcessorConfig, suffix, dlq, excluded_code=None):
+    def create_lambda_processor(self, processor_config: LambdaPythonProcessorConfig, suffix, dlq):
         return self.lambda_context.queued_function(
             processor_config.handler,
             timeout=processor_config.timeout,
