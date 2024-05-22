@@ -69,7 +69,7 @@ class LambdaContext:
                 id=constructed_name,
                 handler=handler,
                 scope=scope_override or self.stage,
-                code=aws_lambda.Code.from_asset(path=self.path, exclude=self.excluded_code), ## TODO SH here we can have an exclude pattern
+                code=aws_lambda.Code.from_asset(path=self.path, exclude=self.excluded_code),
                 runtime=self.runtime,
                 reserved_concurrent_executions=max_concurrency,
                 timeout=to_duration(timeout),
