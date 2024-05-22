@@ -9,6 +9,7 @@ from aws_cdk.aws_events import Rule, Schedule
 from aws_cdk.aws_events_targets import LambdaFunction
 from aws_cdk.aws_iam import IRole
 from aws_cdk.aws_lambda import IEventSource
+from aws_cdk.aws_s3_assets import AssetOptions
 from constructs import Construct, IConstruct
 
 from infraflow.cdk.core.service_stage import ServiceStageStack
@@ -68,7 +69,7 @@ class LambdaContext:
                 id=constructed_name,
                 handler=handler,
                 scope=scope_override or self.stage,
-                code=aws_lambda.Code.from_asset(self.path, {'exclude': self.excluded_code}), ## TODO SH here we can have an exclude pattern
+                code=aws_lambda.Code.from_asset(path=self.path, options=AssetOptions(exclude=self.excluded_code)), ## TODO SH here we can have an exclude pattern
                 runtime=self.runtime,
                 reserved_concurrent_executions=max_concurrency,
                 timeout=to_duration(timeout),
