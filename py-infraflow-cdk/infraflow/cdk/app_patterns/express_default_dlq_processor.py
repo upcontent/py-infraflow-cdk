@@ -93,8 +93,8 @@ class DualPriorityResilientJob(Construct):
         self.name = construct_id
         self.ecs_cluster = ecs_cluster
         self.lambda_context = lambda_context
-        self.express_event = copy.copy(event).express_only() if express_processor else None
-        self.default_event = copy.copy(event).non_express() if express_processor else copy.copy(event)
+        self.express_event = event.express_only() if express_processor else None #note: moved copy of event to event code
+        self.default_event = event.non_express() if express_processor else copy.copy(event)
         self.default_processor = default_processor
         self.express_processor = express_processor
         # self.retry_processor = retry_processor

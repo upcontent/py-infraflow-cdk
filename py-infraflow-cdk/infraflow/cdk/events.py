@@ -78,6 +78,7 @@ class Event:
         """
         This then needs to be used to return a (deep) copy of everything
         """
+        print("in Event.copy()")
         raise NotImplemented
 
 
@@ -152,9 +153,11 @@ class SnsEvent(Event):
         self.bus = bus
 
     def copy(self):
+        print("in SnSEvent.copy()")
         new_event = SnsEvent(self.stage, self.bus_id, self.event_key, self.bus)
         new_event.priority = self.priority
         new_event.filters = copy.deepcopy(self.filters)
+        return new_event
 
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         for queue in subscribers:
@@ -183,9 +186,11 @@ class EventBridgeEvent(Event):
         self.bus = bus
 
     def copy(self):
-        new_event = SnsEvent(self.stage, self.bus_id, self.event_key, self.bus)
+        print("in EventBridgeEvent.copy()")
+        new_event = EventBridgeEvent(stage=self.stage, bus_id=self.bus_id, event_key=self.event_key, bus=self.bus)
         new_event.priority = self.priority
         new_event.filters = copy.deepcopy(self.filters)
+        return new_event
 
     def _subscribe(self, *subscribers: Union[sqs.Queue, lambdas.Function]):
         targets_ = [get_eb_target(subscriber) for subscriber in subscribers]
