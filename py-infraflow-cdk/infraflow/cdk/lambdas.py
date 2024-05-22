@@ -31,7 +31,7 @@ class LambdaContext:
                  vpc: bool = True,
                  subnet_type: SubnetType = SubnetType.PRIVATE_WITH_EGRESS,
                  tracing=aws_lambda.Tracing.ACTIVE,
-                 excluded_code=[]
+                 excluded_code=None
                  ):
         self.vpc = vpc
         self.tracing = tracing
