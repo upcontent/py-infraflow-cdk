@@ -110,6 +110,10 @@ class StandardServiceStage(ServiceStageStack):
             self.managed_policy("LambdaAllowENIManagement", name="AWSLambdaENIManagementAccess")
         )
 
+        self.app_role.add_managed_policy(
+            self.managed_policy("AWSLambdaBasicExecutionRole", name="AWSLambdaBasicExecutionRole")
+        )
+
         self._lambda_context = self._lambda_context or LambdaContext(
             self,
             path=self.src_path,
