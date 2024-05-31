@@ -39,8 +39,10 @@ class ContainerImage:
     def __init__(
             self,
             path=None,
+            dockerfile=None,
             ecr_image=None,
     ):
+        self.dockerfile = dockerfile
         self.ecr_image = ecr_image
         self.path = path
 
@@ -82,7 +84,7 @@ class EcsCluster:
 
     def get_image(self, image: ContainerImage, name):
         if image.path:
-            image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=image.path)
+            image_asset = assets.DockerImageAsset(self.scope, f"{name}_image", directory=image.path, file=image.dockerfile)
             local_image = ecs.ContainerImage.from_docker_image_asset(image_asset)
         else:
             local_image = None
